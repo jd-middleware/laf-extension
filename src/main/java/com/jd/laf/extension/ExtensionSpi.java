@@ -35,15 +35,26 @@ public class ExtensionSpi {
         if (extension == null) {
             return null;
         } else if (extension.isSingleton()) {
+            if (extension.getTarget() == null) {
+                synchronized (extension) {
+                    if (extension.getTarget() == null) {
+                        extension.setTarget(newInstance(extension.getExtension().getClazz()));
+                    }
+                }
+            }
             return extension.getTarget();
         } else {
-            try {
-                return extension.getExtension().getClazz().newInstance();
-            } catch (InstantiationException e) {
-                return null;
-            } catch (IllegalAccessException e) {
-                return null;
-            }
+            return newInstance(extension.getExtension().getClazz());
+        }
+    }
+
+    protected Object newInstance(final Class<?> clazz) {
+        try {
+            return clazz.newInstance();
+        } catch (InstantiationException e) {
+            return null;
+        } catch (IllegalAccessException e) {
+            return null;
         }
     }
 

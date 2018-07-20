@@ -12,7 +12,7 @@ public class SpiLoader implements ExtensionLoader {
     public static final SpiLoader INSTANCE = new SpiLoader();
 
     @Override
-    public ExtensionSpi load(Class<?> clazz) {
+    public ExtensionSpi load(final Class<?> clazz) {
         if (clazz == null) {
             return null;
         }

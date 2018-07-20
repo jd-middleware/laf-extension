@@ -63,7 +63,7 @@ public class ExtensionManager {
         add(extensible, loader);
     }
 
-    public void add(Class<?> extensible, ExtensionLoader loader) {
+    public void add(final Class<?> extensible, final ExtensionLoader loader) {
         if (extensible != null) {
             ExtensionLoader extensionLoader = loader == null ? this.loader : loader;
             ExtensionSpi extensionSpi = extensionLoader.load(extensible);
@@ -73,43 +73,43 @@ public class ExtensionManager {
         }
     }
 
-    public void add(Collection<Class<?>> extensibles) {
+    public void add(final Collection<Class<?>> extensibles) {
         add(extensibles, loader);
     }
 
-    public void add(Collection<Class<?>> extensibles, ExtensionLoader loader) {
+    public void add(final Collection<Class<?>> extensibles, final ExtensionLoader loader) {
         if (extensibles != null) {
             for (Class extensible : extensibles)
                 add(extensible, loader);
         }
     }
 
-    public Object getExtension(String type, String name) {
+    public Object getExtension(final String type, final String name) {
         ExtensionSpi extensionSpi = names.get(type);
         return extensionSpi == null ? null : extensionSpi.getExtension(name);
     }
 
-    public <T> T getExtension(String type, String name, Class<T> clazz) {
+    public <T> T getExtension(final String type, final String name, final Class<T> clazz) {
         ExtensionSpi extensionSpi = names.get(type);
         return extensionSpi == null ? null : extensionSpi.getExtension(name, clazz);
     }
 
-    public <T> T getExtension(Class<T> extensible, String name) {
+    public <T> T getExtension(final Class<T> extensible, final String name) {
         ExtensionSpi extensionSpi = names.get(extensible);
         return extensionSpi == null ? null : extensionSpi.getExtension(name, extensible);
     }
 
-    public <T> List<T> getExtensions(Class<T> extensible) {
+    public <T> List<T> getExtensions(final Class<T> extensible) {
         ExtensionSpi extensionSpi = names.get(extensible);
         return extensionSpi == null ? null : extensionSpi.getExtensions(extensible);
     }
 
-    public List<Object> getExtensions(String type) {
+    public List<Object> getExtensions(final String type) {
         ExtensionSpi extensionSpi = names.get(type);
         return extensionSpi == null ? null : extensionSpi.getExtensions();
     }
 
-    public <T> List<T> getExtensions(String type, Class<T> clazz) {
+    public <T> List<T> getExtensions(final String type, final Class<T> clazz) {
         ExtensionSpi extensionSpi = names.get(type);
         return extensionSpi == null ? null : extensionSpi.getExtensions(clazz);
     }

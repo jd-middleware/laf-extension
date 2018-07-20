@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
  * 扩展点管理
  */
 public class ExtensionManager {
+    private static ExtensionManager INSTANCE = new ExtensionManager();
 
     // 扩展点名称
     private Map<String, ExtensionSpi> names = new ConcurrentHashMap<String, ExtensionSpi>();
@@ -112,6 +113,10 @@ public class ExtensionManager {
     public <T> List<T> getExtensions(final String type, final Class<T> clazz) {
         ExtensionSpi extensionSpi = names.get(type);
         return extensionSpi == null ? null : extensionSpi.getExtensions(clazz);
+    }
+
+    public static ExtensionManager getInstance() {
+        return INSTANCE;
     }
 
 }

@@ -643,9 +643,6 @@ public final class URL implements Serializable {
      * @return 参数值
      */
     public Long getNatural(final String key, final Long def) {
-        if (def != null && def < 0) {
-            throw new IllegalArgumentException("def must be greater than  or equals zero");
-        }
         Long value = getLong(key, def);
         if (value != null && value < 0) {
             return def;
@@ -661,9 +658,6 @@ public final class URL implements Serializable {
      * @return 参数值
      */
     public Integer getNatural(final String key, final Integer def) {
-        if (def != null && def < 0) {
-            throw new IllegalArgumentException("def must be greater than  or equals zero");
-        }
         Integer value = getInteger(key, def);
         if (value != null && value < 0) {
             return def;
@@ -679,9 +673,6 @@ public final class URL implements Serializable {
      * @return 参数值
      */
     public Short getNatural(final String key, final Short def) {
-        if (def != null && def < 0) {
-            throw new IllegalArgumentException("def must be greater than or equals zero");
-        }
         Short value = getShort(key, def);
         if (value != null && value < 0) {
             return def;
@@ -697,9 +688,6 @@ public final class URL implements Serializable {
      * @return 参数值
      */
     public Byte getNatural(final String key, final Byte def) {
-        if (def != null && def < 0) {
-            throw new IllegalArgumentException("def must be greater than or equals zero");
-        }
         Byte value = getByte(key, def);
         if (value != null && value < 0) {
             return def;
@@ -715,9 +703,6 @@ public final class URL implements Serializable {
      * @return 参数值
      */
     public Long getPositive(final String key, final Long def) {
-        if (def != null && def <= 0) {
-            throw new IllegalArgumentException("def must be greater than zero");
-        }
         Long value = getLong(key, def);
         if (value != null && value <= 0) {
             return def;
@@ -733,9 +718,6 @@ public final class URL implements Serializable {
      * @return 参数值
      */
     public Integer getPositive(final String key, final Integer def) {
-        if (def != null && def <= 0) {
-            throw new IllegalArgumentException("def must be greater than zero");
-        }
         Integer value = getInteger(key, def);
         if (value != null && value <= 0) {
             return def;
@@ -751,9 +733,6 @@ public final class URL implements Serializable {
      * @return 参数值
      */
     public Short getPositive(final String key, final Short def) {
-        if (def != null && def <= 0) {
-            throw new IllegalArgumentException("def must be greater than zero");
-        }
         Short value = getShort(key, def);
         if (value != null && value <= 0) {
             return def;
@@ -769,9 +748,6 @@ public final class URL implements Serializable {
      * @return 参数值
      */
     public Byte getPositive(final String key, final Byte def) {
-        if (def != null && def <= 0) {
-            throw new IllegalArgumentException("def must be greater than zero");
-        }
         Byte value = getByte(key, def);
         if (value != null && value <= 0) {
             return def;

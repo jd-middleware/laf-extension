@@ -90,26 +90,86 @@ public class ExtensionManager {
         return extensionSpi == null ? null : extensionSpi.getExtension(name);
     }
 
+    /**
+     * 获取扩展实现
+     *
+     * @param type  类型
+     * @param name  扩展名称
+     * @param clazz
+     * @param <T>
+     * @return
+     */
     public <T> T getExtension(final String type, final String name, final Class<T> clazz) {
         ExtensionSpi extensionSpi = names.get(type);
         return extensionSpi == null ? null : extensionSpi.getExtension(name, clazz);
     }
 
+    /**
+     * 获取扩展实现
+     *
+     * @param extensible 扩展点类
+     * @param name       扩展名称
+     * @param <T>        扩展实现
+     * @return
+     */
     public <T> T getExtension(final Class<T> extensible, final String name) {
-        ExtensionSpi extensionSpi = names.get(extensible);
+        Extensible annotation = getExtensible(extensible);
+        if (annotation == null) return null;
+        ExtensionSpi extensionSpi = names.get(annotation.value());
         return extensionSpi == null ? null : extensionSpi.getExtension(name, extensible);
     }
 
+    /**
+     * 获取注解
+     *
+     * @param extensible
+     * @param <T>
+     * @return
+     */
+    protected <T> Extensible getExtensible(final Class<T> extensible) {
+        if (extensible == null) {
+            return null;
+        }
+        Extensible annotation = extensible.getAnnotation(Extensible.class);
+        if (annotation == null) {
+            return null;
+        }
+        return annotation;
+    }
+
+    /**
+     * 获取扩展实现
+     *
+     * @param extensible 扩展点类型
+     * @param <T>
+     * @return
+     */
     public <T> List<T> getExtensions(final Class<T> extensible) {
-        ExtensionSpi extensionSpi = names.get(extensible);
+        Extensible annotation = getExtensible(extensible);
+        if (annotation == null) return null;
+        ExtensionSpi extensionSpi = names.get(annotation.value());
         return extensionSpi == null ? null : extensionSpi.getExtensions(extensible);
     }
 
+    /**
+     * 获取扩展点实现
+     *
+     * @param type 类型
+     * @return
+     */
     public List<Object> getExtensions(final String type) {
         ExtensionSpi extensionSpi = names.get(type);
         return extensionSpi == null ? null : extensionSpi.getExtensions();
     }
 
+    /**
+     * 获取扩展点实现
+     *
+     * @param type  类型
+     * @param clazz 转换的类型
+     * @param <T>
+     * @return
+     */
     public <T> List<T> getExtensions(final String type, final Class<T> clazz) {
         ExtensionSpi extensionSpi = names.get(type);
         return extensionSpi == null ? null : extensionSpi.getExtensions(clazz);

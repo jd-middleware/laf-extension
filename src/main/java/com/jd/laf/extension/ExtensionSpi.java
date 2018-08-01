@@ -17,15 +17,15 @@ public class ExtensionSpi {
     // 可扩展接口名称
     private Name name;
 
-    public ExtensionSpi(Name name, List<ExtensionMeta> extensions) {
+    public ExtensionSpi(final Name name, final List<ExtensionMeta> extensions) {
         this.extensions = extensions;
         this.name = name;
         if (extensions != null) {
             Name extension;
             for (ExtensionMeta meta : extensions) {
-                name = meta.getExtension();
-                if (name != null && name.getName() != null && !name.getName().isEmpty()) {
-                    names.put(name.getName(), meta);
+                extension = meta.getExtension();
+                if (extension != null && extension.getName() != null && !extension.getName().isEmpty()) {
+                    names.put(extension.getName(), meta);
                 }
             }
         }

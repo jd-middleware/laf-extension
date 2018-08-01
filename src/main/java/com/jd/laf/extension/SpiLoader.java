@@ -18,7 +18,8 @@ public class SpiLoader implements ExtensionLoader {
         }
 
         Extensible extensible = clazz.getAnnotation(Extensible.class);
-        Name extensibleName = new Name(clazz, extensible != null ? extensible.value() : null);
+        Name extensibleName = new Name(clazz, extensible != null && extensible.value() != null
+                && !extensible.value().isEmpty() ? extensible.value() : clazz.getName());
         List<ExtensionMeta> metas = new ArrayList<ExtensionMeta>();
         ServiceLoader<?> loader = ServiceLoader.load(clazz, clazz.getClassLoader());
         ExtensionMeta meta;
@@ -33,7 +34,8 @@ public class SpiLoader implements ExtensionLoader {
             meta = new ExtensionMeta();
             meta.setExtensible(extensibleName);
             meta.setTarget(service);
-            meta.setExtension(new Name(serviceClass, extension == null ? null : extension.value()));
+            meta.setExtension(new Name(serviceClass, extension != null && extension.value() != null
+                    && !extension.value().isEmpty() ? extension.value() : serviceClass.getName()));
             meta.setSingleton(scope == null ? true : scope.singleton());
             metas.add(meta);
         }

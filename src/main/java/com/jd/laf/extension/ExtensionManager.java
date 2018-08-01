@@ -113,9 +113,9 @@ public class ExtensionManager {
      * @return
      */
     public <T> T getExtension(final Class<T> extensible, final String name) {
-        Extensible annotation = getExtensible(extensible);
-        if (annotation == null) return null;
-        ExtensionSpi extensionSpi = names.get(annotation.value());
+        String type = getExtensible(extensible);
+        if (type == null) return null;
+        ExtensionSpi extensionSpi = names.get(type);
         return extensionSpi == null ? null : extensionSpi.getExtension(name, extensible);
     }
 
@@ -126,15 +126,19 @@ public class ExtensionManager {
      * @param <T>
      * @return
      */
-    protected <T> Extensible getExtensible(final Class<T> extensible) {
+    protected <T> String getExtensible(final Class<T> extensible) {
         if (extensible == null) {
             return null;
         }
+        String type = null;
         Extensible annotation = extensible.getAnnotation(Extensible.class);
-        if (annotation == null) {
-            return null;
+        if (annotation != null) {
+            type = annotation.value();
         }
-        return annotation;
+        if (type == null || type.isEmpty()) {
+            type = extensible.getName();
+        }
+        return type;
     }
 
     /**
@@ -145,9 +149,9 @@ public class ExtensionManager {
      * @return
      */
     public <T> List<T> getExtensions(final Class<T> extensible) {
-        Extensible annotation = getExtensible(extensible);
-        if (annotation == null) return null;
-        ExtensionSpi extensionSpi = names.get(annotation.value());
+        String type = getExtensible(extensible);
+        if (type == null) return null;
+        ExtensionSpi extensionSpi = names.get(type);
         return extensionSpi == null ? null : extensionSpi.getExtensions(extensible);
     }
 

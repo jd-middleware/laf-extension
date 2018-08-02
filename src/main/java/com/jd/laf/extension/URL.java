@@ -325,7 +325,7 @@ public final class URL implements Serializable {
     }
 
     public Map<String, String> getParameters() {
-        return parameters;
+        return new HashMap<String, String>(parameters);
     }
 
     /**

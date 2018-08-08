@@ -644,8 +644,17 @@ public final class URL implements Serializable {
         String value = getString(key);
         if (value == null || value.isEmpty()) {
             return def;
+        } else if ("true".equalsIgnoreCase(value)) {
+            return Boolean.TRUE;
+        } else if ("false".equalsIgnoreCase(value)) {
+            return Boolean.FALSE;
+        } else {
+            try {
+                return Integer.parseInt(value) != 0;
+            } catch (NumberFormatException e) {
+            }
         }
-        return Boolean.parseBoolean(value);
+        return def;
     }
 
     /**

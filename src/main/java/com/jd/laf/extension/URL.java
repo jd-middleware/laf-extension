@@ -140,11 +140,12 @@ public final class URL implements Serializable {
             url = url.substring(i + 3);
         } else if (i < 0) {
             // case: file:/path/to/file.txt
+            // case: file:/D:\config
             i = url.indexOf(":/");
             if (i > 0) {
                 protocol = url.substring(0, i);
                 // 保留路径符号“/”
-                url = url.substring(i + 1);
+                url = url.substring(i + 2);
             }
         }
         if (protocol == null || protocol.isEmpty()) {
@@ -318,10 +319,22 @@ public final class URL implements Serializable {
     }
 
     public String getAbsolutePath() {
-        if (path != null && path.charAt(0) != '/') {
-            return "/" + path;
+        if (path == null) {
+            return null;
         }
-        return path;
+        char first = path.charAt(0);
+        if (first == '/') {
+            return path;
+        }
+        // 判断是否是windows路径
+        if (((first > 'a' && first < 'z') || (first > 'A' && first < 'Z')) && path.length() >= 3) {
+            char second = path.charAt(1);
+            char third = path.charAt(2);
+            if (second == ':' && (third == '/' || third == '\\')) {
+                return path;
+            }
+        }
+        return "/" + path;
     }
 
     public Map<String, String> getParameters() {

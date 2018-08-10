@@ -16,5 +16,5 @@ public @interface Extensible {
      *
      * @return
      */
-    String value();
+    String value() default "";
 }

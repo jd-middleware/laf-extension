@@ -16,5 +16,5 @@ public @interface Extension {
      *
      * @return
      */
-    String value();
+    String value() default "";
 }

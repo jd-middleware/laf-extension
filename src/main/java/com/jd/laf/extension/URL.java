@@ -1210,14 +1210,19 @@ public final class URL implements Serializable {
             }
             buf.append('@');
         }
+        boolean address = false;
         if (host != null && !host.isEmpty()) {
+            address = true;
             buf.append(host);
             if (port > 0) {
                 buf.append(':').append(port);
             }
         }
         if (path != null && !path.isEmpty()) {
-            buf.append('/').append(path);
+            if (address) {
+                buf.append('/');
+            }
+            buf.append(path);
         }
         if (parameter) {
             append(buf, true, parameters);

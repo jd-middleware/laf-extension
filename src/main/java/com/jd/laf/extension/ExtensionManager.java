@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * 扩展点管理
  */
 public class ExtensionManager {
-    private static final ExtensionManager INSTANCE = new ExtensionManager();
+    public static ExtensionManager INSTANCE = new ExtensionManager();
 
     // 扩展点名称
     protected Map<String, ExtensionSpi> names = new ConcurrentHashMap<String, ExtensionSpi>();
@@ -170,10 +170,6 @@ public class ExtensionManager {
             spi = names.get(type);
         }
         return spi;
-    }
-
-    public static ExtensionManager getInstance() {
-        return INSTANCE;
     }
 
 }

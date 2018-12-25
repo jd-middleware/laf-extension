@@ -1,8 +1,6 @@
 package com.jd.laf.extension;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ServiceLoader;
+import java.util.*;
 
 /**
  * SPI加载插件
@@ -21,24 +19,60 @@ public class SpiLoader implements ExtensionLoader {
         Name extensibleName = new Name(clazz, extensible != null && extensible.value() != null
                 && !extensible.value().isEmpty() ? extensible.value() : clazz.getName());
         List<ExtensionMeta> metas = new ArrayList<ExtensionMeta>();
-        ServiceLoader<?> loader = ServiceLoader.load(clazz, clazz.getClassLoader());
-        ExtensionMeta meta;
-        Extension extension;
-        Scope scope;
+        Iterable<?> loader = loadExtensions(clazz);
         Class<?> serviceClass;
+        Object target;
+        Instance instance;
+        Name name;
+        //遍历扩展点
         for (Object service : loader) {
-            serviceClass = service.getClass();
-            extension = serviceClass.getAnnotation(Extension.class);
-            scope = serviceClass.getAnnotation(Scope.class);
-
-            meta = new ExtensionMeta();
+            //如果扩展点是实例描述信息，例如Spring的加载器
+            if (service instanceof Instantiation) {
+                Instantiation instantiation = (Instantiation) service;
+                name = instantiation.getName();
+                serviceClass = name.getClazz();
+                target = instantiation.getTarget();
+                instance = instantiation.getInstance();
+            } else {
+                serviceClass = service.getClass();
+                target = service;
+                instance = Instance.ClazzInstance.INSTANCE;
+                name = new Name(serviceClass);
+            }
+            Extension extension = serviceClass.getAnnotation(Extension.class);
+            ExtensionMeta meta = new ExtensionMeta();
             meta.setExtensible(extensibleName);
-            meta.setTarget(service);
-            meta.setExtension(new Name(serviceClass, extension != null && extension.value() != null
-                    && !extension.value().isEmpty() ? extension.value() : serviceClass.getName()));
-            meta.setSingleton(scope == null ? true : scope.singleton());
+            meta.setTarget(target);
+            meta.setExtension(new Name(serviceClass, Type.class.isAssignableFrom(serviceClass) ?
+                    ((Type) target).type() :
+                    (extension != null && extension.value() != null && !extension.value().isEmpty() ?
+                            extension.value() : serviceClass.getName())));
+            meta.setSingleton(extension == null ? true : extension.singleton());
+            meta.setOrder(Ordered.class.isAssignableFrom(serviceClass) ?
+                    ((Ordered) target).order() : (extension == null ? Short.MAX_VALUE : extension.order()));
+            meta.setInstance(instance != null ? instance : Instance.ClazzInstance.INSTANCE);
+            meta.setName(name);
             metas.add(meta);
         }
+
+        //按照顺序升序排序
+        Collections.sort(metas, new Comparator<ExtensionMeta>() {
+            @Override
+            public int compare(ExtensionMeta o1, ExtensionMeta o2) {
+                return o1.getOrder() - o2.getOrder();
+            }
+        });
+
         return new ExtensionSpi(extensibleName, metas);
+    }
+
+    /**
+     * 加载插件
+     *
+     * @param clazz
+     * @return
+     */
+    protected Iterable<?> loadExtensions(final Class<?> clazz) {
+        return ServiceLoader.load(clazz);
     }
 }

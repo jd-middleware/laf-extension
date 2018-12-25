@@ -58,28 +58,12 @@ public class ExtensionSpi {
         }
     }
 
-    public Object getExtension(final String name) {
+    public <T> T getExtension(final String name) {
         ExtensionMeta meta = names.get(name);
-        return getObject(meta);
+        return (T) getObject(meta);
     }
 
-    public <T> T getExtension(final String name, final Class<T> clazz) {
-        return (T) getExtension(name);
-    }
-
-    public List<Object> getExtensions() {
-        List<Object> result = new ArrayList<Object>(extensions.size());
-        Object object;
-        for (ExtensionMeta extension : extensions) {
-            object = getObject(extension);
-            if (object != null) {
-                result.add(object);
-            }
-        }
-        return result;
-    }
-
-    public <T> List<T> getExtensions(final Class<T> clazz) {
+    public <T> List<T> getExtensions() {
         List<T> result = new ArrayList<T>(extensions.size());
         Object object;
         for (ExtensionMeta extension : extensions) {

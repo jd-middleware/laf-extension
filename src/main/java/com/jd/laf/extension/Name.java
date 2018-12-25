@@ -9,6 +9,10 @@ public class Name {
     // 名称
     private String name;
 
+    public Name(Class clazz) {
+        this.clazz = clazz;
+    }
+
     public Name(Class clazz, String name) {
         this.clazz = clazz;
         this.name = name;
@@ -20,5 +24,9 @@ public class Name {
 
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

@@ -3,15 +3,13 @@ package com.jd.laf.extension;
 /**
  * 扩展点元数据
  */
-public class ExtensionMeta {
-    // 可扩展接口名称
-    private Name extensible;
-    // 扩展点名称
-    private Name extension;
-    // 是否是单例
-    private boolean singleton = true;
-    // 单例
-    private Object target;
+public class ExtensionMeta extends Instantiation {
+    //可扩展接口名称
+    protected Name extensible;
+    //扩展点名称
+    protected Name extension;
+    //顺序
+    protected int order;
 
     public Name getExtensible() {
         return extensible;
@@ -29,19 +27,12 @@ public class ExtensionMeta {
         this.extension = extension;
     }
 
-    public boolean isSingleton() {
-        return singleton;
+    public int getOrder() {
+        return order;
     }
 
-    public void setSingleton(boolean singleton) {
-        this.singleton = singleton;
+    public void setOrder(int order) {
+        this.order = order;
     }
 
-    public Object getTarget() {
-        return target;
-    }
-
-    public void setTarget(Object target) {
-        this.target = target;
-    }
 }

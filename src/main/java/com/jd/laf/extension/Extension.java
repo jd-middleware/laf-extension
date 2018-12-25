@@ -17,4 +17,18 @@ public @interface Extension {
      * @return
      */
     String value() default "";
+
+    /**
+     * 排序顺序，按照优先级升序排序
+     *
+     * @return
+     */
+    int order() default Short.MAX_VALUE;
+
+    /**
+     * 单例
+     *
+     * @return
+     */
+    boolean singleton() default true;
 }

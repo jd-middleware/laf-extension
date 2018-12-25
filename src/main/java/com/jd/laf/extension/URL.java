@@ -8,7 +8,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -342,6 +341,16 @@ public final class URL implements Serializable {
     }
 
     /**
+     * 获取参数，该方法便于绑定
+     *
+     * @param key
+     * @return
+     */
+    public Object getObject(final String key) {
+        return getString(key);
+    }
+
+    /**
      * 获取字符串参数值
      *
      * @param key 参数名称
@@ -410,11 +419,7 @@ public final class URL implements Serializable {
      * @return 参数值
      */
     public Date getDate(final String key, final Date def) {
-        Long value = getLong(key, null);
-        if (value == null) {
-            return def;
-        }
-        return new Date(value);
+        return Converts.getDate(getString(key), def);
     }
 
     /**
@@ -425,7 +430,7 @@ public final class URL implements Serializable {
      * @return 参数值
      */
     public Date getDate(final String key, final SimpleDateFormat format) {
-        return getDate(key, format, null);
+        return Converts.getDate(getString(key), format, null);
     }
 
     /**
@@ -437,15 +442,7 @@ public final class URL implements Serializable {
      * @return 参数值
      */
     public Date getDate(final String key, final SimpleDateFormat format, final Date def) {
-        String value = getString(key);
-        if (value == null || value.isEmpty() || format == null) {
-            return def;
-        }
-        try {
-            return format.parse(key);
-        } catch (ParseException e) {
-            return def;
-        }
+        return Converts.getDate(getString(key), format, def);
     }
 
     /**
@@ -455,7 +452,7 @@ public final class URL implements Serializable {
      * @return 参数值
      */
     public Float getFloat(final String key) {
-        return getFloat(key, null);
+        return Converts.getFloat(getString(key), null);
     }
 
     /**
@@ -466,15 +463,7 @@ public final class URL implements Serializable {
      * @return 参数值
      */
     public Float getFloat(final String key, final Float def) {
-        String value = getString(key);
-        if (value == null || value.isEmpty()) {
-            return def;
-        }
-        try {
-            return Float.parseFloat(value);
-        } catch (NumberFormatException e) {
-            return def;
-        }
+        return Converts.getFloat(getString(key), def);
     }
 
     /**
@@ -484,7 +473,7 @@ public final class URL implements Serializable {
      * @return 参数值
      */
     public Double getDouble(final String key) {
-        return getDouble(key, null);
+        return Converts.getDouble(getString(key), null);
     }
 
     /**
@@ -495,15 +484,7 @@ public final class URL implements Serializable {
      * @return 参数值
      */
     public Double getDouble(final String key, final Double def) {
-        String value = getString(key);
-        if (value == null || value.isEmpty()) {
-            return def;
-        }
-        try {
-            return Double.parseDouble(value);
-        } catch (NumberFormatException e) {
-            return def;
-        }
+        return Converts.getDouble(getString(key), def);
     }
 
     /**
@@ -513,7 +494,7 @@ public final class URL implements Serializable {
      * @return 参数值
      */
     public Long getLong(final String key) {
-        return getLong(key, null);
+        return Converts.getLong(getString(key), null);
     }
 
     /**
@@ -524,15 +505,7 @@ public final class URL implements Serializable {
      * @return 参数值
      */
     public Long getLong(final String key, final Long def) {
-        String value = getString(key);
-        if (value == null || value.isEmpty()) {
-            return def;
-        }
-        try {
-            return Long.parseLong(value);
-        } catch (NumberFormatException e) {
-            return def;
-        }
+        return Converts.getLong(getString(key), def);
     }
 
     /**
@@ -542,7 +515,7 @@ public final class URL implements Serializable {
      * @return 参数值
      */
     public Integer getInteger(final String key) {
-        return getInteger(key, null);
+        return Converts.getInteger(getString(key), null);
     }
 
     /**
@@ -553,15 +526,7 @@ public final class URL implements Serializable {
      * @return 参数值
      */
     public Integer getInteger(final String key, final Integer def) {
-        String value = getString(key);
-        if (value == null || value.isEmpty()) {
-            return def;
-        }
-        try {
-            return Integer.parseInt(value);
-        } catch (NumberFormatException e) {
-            return def;
-        }
+        return Converts.getInteger(getString(key), def);
     }
 
     /**
@@ -571,7 +536,7 @@ public final class URL implements Serializable {
      * @return 参数值
      */
     public Short getShort(final String key) {
-        return getShort(key, null);
+        return Converts.getShort(getString(key), null);
     }
 
     /**
@@ -582,15 +547,7 @@ public final class URL implements Serializable {
      * @return 参数值
      */
     public Short getShort(final String key, final Short def) {
-        String value = getString(key);
-        if (value == null || value.isEmpty()) {
-            return def;
-        }
-        try {
-            return Short.parseShort(value);
-        } catch (NumberFormatException e) {
-            return def;
-        }
+        return Converts.getShort(getString(key), def);
     }
 
     /**
@@ -600,7 +557,7 @@ public final class URL implements Serializable {
      * @return 参数值
      */
     public Byte getByte(final String key) {
-        return getByte(key, null);
+        return Converts.getByte(getString(key), null);
     }
 
 
@@ -612,15 +569,7 @@ public final class URL implements Serializable {
      * @return 参数值
      */
     public Byte getByte(final String key, final Byte def) {
-        String value = getString(key);
-        if (value == null || value.isEmpty()) {
-            return def;
-        }
-        try {
-            return Byte.parseByte(value);
-        } catch (NumberFormatException e) {
-            return def;
-        }
+        return Converts.getByte(getString(key), def);
     }
 
     /**
@@ -630,7 +579,7 @@ public final class URL implements Serializable {
      * @return 参数值
      */
     public Boolean getBoolean(final String key) {
-        return getBoolean(key, null);
+        return Converts.getBoolean(getString(key), null);
     }
 
     /**
@@ -641,20 +590,7 @@ public final class URL implements Serializable {
      * @return 参数值
      */
     public Boolean getBoolean(final String key, final Boolean def) {
-        String value = getString(key);
-        if (value == null || value.isEmpty()) {
-            return def;
-        } else if ("true".equalsIgnoreCase(value)) {
-            return Boolean.TRUE;
-        } else if ("false".equalsIgnoreCase(value)) {
-            return Boolean.FALSE;
-        } else {
-            try {
-                return Integer.parseInt(value) != 0;
-            } catch (NumberFormatException e) {
-            }
-        }
-        return def;
+        return Converts.getBoolean(getString(key), def);
     }
 
     /**
@@ -665,11 +601,7 @@ public final class URL implements Serializable {
      * @return 参数值
      */
     public Long getNatural(final String key, final Long def) {
-        Long value = getLong(key, def);
-        if (value != null && value < 0) {
-            return def;
-        }
-        return value;
+        return Converts.getNatural(getString(key), def);
     }
 
     /**
@@ -680,11 +612,7 @@ public final class URL implements Serializable {
      * @return 参数值
      */
     public Integer getNatural(final String key, final Integer def) {
-        Integer value = getInteger(key, def);
-        if (value != null && value < 0) {
-            return def;
-        }
-        return value;
+        return Converts.getNatural(getString(key), def);
     }
 
     /**
@@ -695,11 +623,7 @@ public final class URL implements Serializable {
      * @return 参数值
      */
     public Short getNatural(final String key, final Short def) {
-        Short value = getShort(key, def);
-        if (value != null && value < 0) {
-            return def;
-        }
-        return value;
+        return Converts.getNatural(getString(key), def);
     }
 
     /**
@@ -710,11 +634,7 @@ public final class URL implements Serializable {
      * @return 参数值
      */
     public Byte getNatural(final String key, final Byte def) {
-        Byte value = getByte(key, def);
-        if (value != null && value < 0) {
-            return def;
-        }
-        return value;
+        return Converts.getNatural(getString(key), def);
     }
 
     /**
@@ -725,11 +645,7 @@ public final class URL implements Serializable {
      * @return 参数值
      */
     public Long getPositive(final String key, final Long def) {
-        Long value = getLong(key, def);
-        if (value != null && value <= 0) {
-            return def;
-        }
-        return value;
+        return Converts.getPositive(getString(key), def);
     }
 
     /**
@@ -740,11 +656,7 @@ public final class URL implements Serializable {
      * @return 参数值
      */
     public Integer getPositive(final String key, final Integer def) {
-        Integer value = getInteger(key, def);
-        if (value != null && value <= 0) {
-            return def;
-        }
-        return value;
+        return Converts.getPositive(getString(key), def);
     }
 
     /**
@@ -755,11 +667,7 @@ public final class URL implements Serializable {
      * @return 参数值
      */
     public Short getPositive(final String key, final Short def) {
-        Short value = getShort(key, def);
-        if (value != null && value <= 0) {
-            return def;
-        }
-        return value;
+        return Converts.getPositive(getString(key), def);
     }
 
     /**
@@ -770,11 +678,7 @@ public final class URL implements Serializable {
      * @return 参数值
      */
     public Byte getPositive(final String key, final Byte def) {
-        Byte value = getByte(key, def);
-        if (value != null && value <= 0) {
-            return def;
-        }
-        return value;
+        return Converts.getPositive(getString(key), def);
     }
 
     /**

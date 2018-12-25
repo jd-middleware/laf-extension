@@ -19,7 +19,7 @@ public class ExtensionManagerTest {
         Assert.assertNotNull(producer1);
         Producer producer2 = manager.getExtension(Producer.class, "com.jd.laf.extension.MyProducer");
         Assert.assertNotEquals(producer1, producer2);
-        Producer producer3 = (Producer) manager.getExtension(Producer.class.getName(), "com.jd.laf.extension.MyProducer");
+        Producer producer3 = manager.getExtension(Producer.class.getName(), "com.jd.laf.extension.MyProducer");
         Assert.assertNotNull(producer3);
     }
 }

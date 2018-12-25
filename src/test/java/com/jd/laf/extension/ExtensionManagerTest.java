@@ -7,9 +7,11 @@ public class ExtensionManagerTest {
 
     @Test
     public void test() {
-        ExtensionManager manager = ExtensionManager.getInstance();
-        manager.add(Consumer.class);
-        manager.add(Producer.class);
+        ExtensionManager manager = ExtensionManager.INSTANCE;
+        ExtensionSpi spi1 = manager.add(Consumer.class);
+        ExtensionSpi spi2 = manager.add(Consumer.class);
+        ExtensionSpi spi3 = manager.add(Producer.class);
+        Assert.assertEquals(spi1, spi2);
         Consumer consumer1 = manager.getExtension(Consumer.class, "myConsumer");
         Assert.assertNotNull(consumer1);
         Consumer consumer2 = manager.getExtension(Consumer.class, "myConsumer");

@@ -2,8 +2,8 @@ package com.jd.laf.extension;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * 扩展点管理
@@ -12,9 +12,9 @@ public class ExtensionManager {
     public static ExtensionManager INSTANCE = new ExtensionManager();
 
     // 扩展点名称
-    protected Map<String, ExtensionSpi> names = new ConcurrentHashMap<String, ExtensionSpi>();
+    protected ConcurrentMap<String, ExtensionSpi> names = new ConcurrentHashMap<String, ExtensionSpi>();
     // 扩展点
-    protected Map<Class, ExtensionSpi> extensions = new ConcurrentHashMap<Class, ExtensionSpi>();
+    protected ConcurrentMap<Class, ExtensionSpi> extensions = new ConcurrentHashMap<Class, ExtensionSpi>();
     // 默认加载器
     protected ExtensionLoader loader = SpiLoader.INSTANCE;
 
@@ -46,28 +46,40 @@ public class ExtensionManager {
         add(extensibles, loader);
     }
 
-    protected void add(final ExtensionSpi extensionSpi) {
+    protected ExtensionSpi add(final ExtensionSpi extensionSpi) {
         if (extensionSpi != null) {
             Name name = extensionSpi.getName();
-            extensions.put(name.getClazz(), extensionSpi);
-            if (name.getName() != null && !name.getName().isEmpty()) {
-                names.put(name.getName(), extensionSpi);
+            //防止并发
+            ExtensionSpi exists = extensions.putIfAbsent(name.getClazz(), extensionSpi);
+            if (exists == null) {
+                if (name.getName() != null && !name.getName().isEmpty()) {
+                    names.put(name.getName(), extensionSpi);
+                }
+                return extensionSpi;
             }
+            return exists;
         }
+        return null;
     }
 
-    public void add(final Class<?> extensible) {
-        add(extensible, loader);
+    public ExtensionSpi add(final Class<?> extensible) {
+        return add(extensible, loader);
     }
 
-    public void add(final Class<?> extensible, final ExtensionLoader loader) {
+    public ExtensionSpi add(final Class<?> extensible, final ExtensionLoader loader) {
         if (extensible != null) {
-            ExtensionLoader extensionLoader = loader == null ? this.loader : loader;
-            ExtensionSpi extensionSpi = extensionLoader.load(extensible);
-            if (extensionSpi != null) {
-                add(extensionSpi);
+            //判断是否重复添加
+            ExtensionSpi extensionSpi = getExtensionSpi(extensible);
+            if (extensionSpi == null) {
+                ExtensionLoader extensionLoader = loader == null ? this.loader : loader;
+                extensionSpi = extensionLoader.load(extensible);
+                if (extensionSpi != null) {
+                    return add(extensionSpi);
+                }
             }
+            return extensionSpi;
         }
+        return null;
     }
 
     public void add(final Collection<Class<?>> extensibles) {

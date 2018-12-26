@@ -18,7 +18,7 @@ public class SpiLoader implements ExtensionLoader {
         Extensible extensible = clazz.getAnnotation(Extensible.class);
         Name extensibleName = new Name(clazz, extensible != null && extensible.value() != null
                 && !extensible.value().isEmpty() ? extensible.value() : clazz.getName());
-        List<ExtensionMeta> metas = new ArrayList<ExtensionMeta>();
+        List<ExtensionMeta> metas = new LinkedList<ExtensionMeta>();
         Iterable<?> targets = loadExtensions(clazz);
         Class<?> serviceClass;
         Object target;

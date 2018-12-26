@@ -1,9 +1,10 @@
 package com.jd.laf.extension;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * 指定接口的扩展点
@@ -11,22 +12,21 @@ import java.util.Map;
 public class ExtensionSpi {
 
     // 扩展点名称
-    private Map<Object, ExtensionMeta> names = new HashMap<Object, ExtensionMeta>();
+    private ConcurrentMap<Object, ExtensionMeta> names;
     // 扩展点集合
     private List<ExtensionMeta> extensions;
     // 可扩展接口名称
     private Name name;
 
     public ExtensionSpi(final Name name, final List<ExtensionMeta> extensions) {
-        this.extensions = extensions;
         this.name = name;
-        if (extensions != null) {
-            Name extension;
-            for (ExtensionMeta meta : extensions) {
-                extension = meta.getExtension();
-                if (extension != null && extension.getName() != null) {
-                    names.put(extension.getName(), meta);
-                }
+        this.extensions = new CopyOnWriteArrayList<ExtensionMeta>(extensions);
+        this.names = new ConcurrentHashMap<Object, ExtensionMeta>(extensions.size() + 10);
+        Name extension;
+        for (ExtensionMeta meta : extensions) {
+            extension = meta.getExtension();
+            if (extension != null && extension.getName() != null) {
+                names.put(extension.getName(), meta);
             }
         }
     }
@@ -73,6 +73,30 @@ public class ExtensionSpi {
             }
         }
         return result;
+    }
+
+    /**
+     * 动态添加扩展点
+     *
+     * @param extensible
+     * @param name
+     * @param target
+     */
+    public boolean addExtension(final Class extensible, final Object name, final Object target) {
+        if (extensible == null || name == null || target == null) {
+            return false;
+        }
+        Class<?> targetClass = target.getClass();
+        ExtensionMeta meta = new ExtensionMeta();
+        meta.setTarget(target);
+        meta.setOrder(Ordered.ORDER);
+        meta.setName(new Name(targetClass));
+        meta.setExtensible(new Name(extensible));
+        meta.setExtension(new Name(targetClass, name));
+        meta.setSingleton(true);
+        extensions.add(meta);
+        names.put(name, meta);
+        return true;
     }
 
     public Name getName() {

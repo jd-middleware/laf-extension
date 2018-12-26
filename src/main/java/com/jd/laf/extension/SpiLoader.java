@@ -50,7 +50,7 @@ public class SpiLoader implements ExtensionLoader {
                             extension.value() : serviceClass.getName())));
             meta.setSingleton(extension == null ? true : extension.singleton());
             meta.setOrder(Ordered.class.isAssignableFrom(serviceClass) ?
-                    ((Ordered) target).order() : (extension == null ? Short.MAX_VALUE : extension.order()));
+                    ((Ordered) target).order() : (extension == null ? Ordered.ORDER : extension.order()));
             meta.setInstance(instance != null ? instance : Instance.ClazzInstance.INSTANCE);
             meta.setName(name);
             metas.add(meta);

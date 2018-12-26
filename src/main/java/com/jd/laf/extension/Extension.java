@@ -23,7 +23,7 @@ public @interface Extension {
      *
      * @return
      */
-    int order() default Short.MAX_VALUE;
+    int order() default Ordered.ORDER;
 
     /**
      * 单例

@@ -2,6 +2,7 @@ package com.jd.laf.extension;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -21,15 +22,11 @@ public class ExtensionManager {
     public ExtensionManager() {
     }
 
-    public ExtensionManager(ExtensionScanner scanner) {
-        if (scanner != null) {
-            List<ExtensionSpi> extensionSpis = scanner.scan();
-            if (extensionSpis != null) {
-                for (ExtensionSpi extensionSpi : extensionSpis) {
-                    add(extensionSpi);
-                }
-            }
+    public ExtensionManager(ExtensionScanner scanner, ExtensionLoader loader) {
+        if (loader != null) {
+            this.loader = loader;
         }
+        add(scanner);
     }
 
     public ExtensionManager(ExtensionLoader loader) {
@@ -39,10 +36,13 @@ public class ExtensionManager {
     }
 
     public ExtensionManager(Collection<Class<?>> extensibles) {
-        add(extensibles);
+        add(extensibles, loader);
     }
 
     public ExtensionManager(Collection<Class<?>> extensibles, ExtensionLoader loader) {
+        if (loader != null) {
+            this.loader = loader;
+        }
         add(extensibles, loader);
     }
 
@@ -90,6 +90,17 @@ public class ExtensionManager {
         if (extensibles != null) {
             for (Class extensible : extensibles) {
                 add(extensible, loader);
+            }
+        }
+    }
+
+    public void add(final ExtensionScanner scanner) {
+        if (scanner != null) {
+            Set<Class> extensions = scanner.scan();
+            if (extensions != null) {
+                for (Class extension : extensions) {
+                    add(extension, loader);
+                }
             }
         }
     }
@@ -182,6 +193,35 @@ public class ExtensionManager {
             spi = names.get(type);
         }
         return spi;
+    }
+
+    /**
+     * 初始化扫描插件并自动加载
+     */
+    public static void load() {
+        load(null, null);
+    }
+
+    /**
+     * 初始化扫描插件并加载
+     *
+     * @param loader
+     */
+    public static void load(final ExtensionLoader loader) {
+        load(null, loader);
+    }
+
+    /**
+     * 初始化扫描插件并加载
+     *
+     * @param scanner
+     * @param loader
+     */
+    public static void load(final ExtensionScanner scanner, final ExtensionLoader loader) {
+        if (loader != null && loader != INSTANCE.loader) {
+            INSTANCE = new ExtensionManager(loader);
+        }
+        INSTANCE.add(scanner != null ? scanner : new ExtensionScanner.DefaultScanner());
     }
 
 }

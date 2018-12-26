@@ -30,7 +30,7 @@ public class Instantiation {
         this.singleton = singleton;
     }
 
-    public Object getTarget() {
+    public <T> T getTarget() {
         if (isSingleton()) {
             if (target == null) {
                 synchronized (this) {
@@ -39,7 +39,7 @@ public class Instantiation {
                     }
                 }
             }
-            return target;
+            return (T) target;
         }
         return instance.newInstance(name);
     }

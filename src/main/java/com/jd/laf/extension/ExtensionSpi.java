@@ -11,7 +11,7 @@ import java.util.Map;
 public class ExtensionSpi {
 
     // 扩展点名称
-    private Map<String, ExtensionMeta> names = new HashMap<String, ExtensionMeta>();
+    private Map<Object, ExtensionMeta> names = new HashMap<Object, ExtensionMeta>();
     // 扩展点集合
     private List<ExtensionMeta> extensions;
     // 可扩展接口名称
@@ -24,7 +24,7 @@ public class ExtensionSpi {
             Name extension;
             for (ExtensionMeta meta : extensions) {
                 extension = meta.getExtension();
-                if (extension != null && extension.getName() != null && !extension.getName().isEmpty()) {
+                if (extension != null && extension.getName() != null) {
                     names.put(extension.getName(), meta);
                 }
             }
@@ -58,7 +58,7 @@ public class ExtensionSpi {
         }
     }
 
-    public <T> T getExtension(final String name) {
+    public <T> T getExtension(final Object name) {
         ExtensionMeta meta = names.get(name);
         return (T) getObject(meta);
     }

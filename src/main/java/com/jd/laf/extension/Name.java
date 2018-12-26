@@ -7,13 +7,13 @@ public class Name {
     // 类型
     private Class clazz;
     // 名称
-    private String name;
+    private Object name;
 
     public Name(Class clazz) {
         this.clazz = clazz;
     }
 
-    public Name(Class clazz, String name) {
+    public Name(Class clazz, Object name) {
         this.clazz = clazz;
         this.name = name;
     }
@@ -22,11 +22,11 @@ public class Name {
         return clazz;
     }
 
-    public String getName() {
+    public Object getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(Object name) {
         this.name = name;
     }
 }

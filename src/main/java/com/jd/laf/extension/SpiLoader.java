@@ -7,10 +7,10 @@ import java.util.*;
  */
 public class SpiLoader implements ExtensionLoader {
 
-    public static final SpiLoader INSTANCE = new SpiLoader();
+    public static final ExtensionLoader INSTANCE = new SpiLoader();
 
     @Override
-    public ExtensionSpi load(final Class<?> clazz) {
+    public ExtensionSpi load(final Class<?> clazz, final Comparator<ExtensionMeta> comparator) {
         if (clazz == null) {
             return null;
         }
@@ -19,13 +19,14 @@ public class SpiLoader implements ExtensionLoader {
         Name extensibleName = new Name(clazz, extensible != null && extensible.value() != null
                 && !extensible.value().isEmpty() ? extensible.value() : clazz.getName());
         List<ExtensionMeta> metas = new ArrayList<ExtensionMeta>();
-        Iterable<?> loader = loadExtensions(clazz);
+        Iterable<?> targets = loadExtensions(clazz);
         Class<?> serviceClass;
         Object target;
         Instance instance;
+        //实例名称，可以保存Spring的Bean的名称
         Name name;
         //遍历扩展点
-        for (Object service : loader) {
+        for (Object service : targets) {
             //如果扩展点是实例描述信息，例如Spring的加载器
             if (service instanceof Instantiation) {
                 Instantiation instantiation = (Instantiation) service;
@@ -55,13 +56,8 @@ public class SpiLoader implements ExtensionLoader {
             metas.add(meta);
         }
 
-        //按照顺序升序排序
-        Collections.sort(metas, new Comparator<ExtensionMeta>() {
-            @Override
-            public int compare(ExtensionMeta o1, ExtensionMeta o2) {
-                return o1.getOrder() - o2.getOrder();
-            }
-        });
+        //排序
+        Collections.sort(metas, comparator == null ? AscendingComparator.INSTANCE : comparator);
 
         return new ExtensionSpi(extensibleName, metas);
     }

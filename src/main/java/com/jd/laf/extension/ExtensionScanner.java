@@ -18,7 +18,7 @@ public interface ExtensionScanner {
      *
      * @return 扩展点类型
      */
-    Set<Class> scan();
+    Set<Class<?>> scan();
 
     /**
      * 默认扩展点扫描，扫描文件META-INF/com.jd.laf.extension
@@ -26,8 +26,8 @@ public interface ExtensionScanner {
     class DefaultScanner implements ExtensionScanner {
 
         @Override
-        public Set<Class> scan() {
-            Set<Class> classes = new LinkedHashSet<Class>();
+        public Set<Class<?>> scan() {
+            Set<Class<?>> classes = new LinkedHashSet<Class<?>>();
             ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
             try {
                 Enumeration<URL> urls = classLoader.getResources("META-INF/com.jd.laf.extension");
@@ -46,7 +46,7 @@ public interface ExtensionScanner {
          * @param url
          * @param classes
          */
-        protected void scan(final ClassLoader classLoader, final URL url, final Set<Class> classes) {
+        protected void scan(final ClassLoader classLoader, final URL url, final Set<Class<?>> classes) {
             BufferedReader input = null;
             try {
                 input = new BufferedReader(new InputStreamReader(url.openStream()));

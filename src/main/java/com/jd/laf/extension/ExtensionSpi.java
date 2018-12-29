@@ -1,6 +1,6 @@
 package com.jd.laf.extension;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -9,97 +9,113 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /**
  * 指定接口的扩展点
  */
-public class ExtensionSpi {
+public class ExtensionSpi<T, M> implements ExtensionPoint<T, M> {
 
-    // 扩展点名称
-    private ConcurrentMap<Object, ExtensionMeta> names;
-    // 扩展点集合
-    private List<ExtensionMeta> extensions;
-    // 可扩展接口名称
-    private Name name;
+    //扩展实现
+    protected ConcurrentMap<M, List<ExtensionMeta<T, M>>> multiNames;
+    //扩展实现
+    protected ConcurrentMap<M, ExtensionMeta<T, M>> names;
+    //扩展实现
+    protected List<ExtensionMeta<T, M>> extensions;
+    //扩展点名称
+    protected Name<T, String> name;
 
-    public ExtensionSpi(final Name name, final List<ExtensionMeta> extensions) {
+    public ExtensionSpi(final Name<T, String> name, final List<ExtensionMeta<T, M>> extensions) {
         this.name = name;
-        this.extensions = new CopyOnWriteArrayList<ExtensionMeta>(extensions);
-        this.names = new ConcurrentHashMap<Object, ExtensionMeta>(extensions.size() + 10);
-        Name extension;
-        for (ExtensionMeta meta : extensions) {
-            extension = meta.getExtension();
-            if (extension != null && extension.getName() != null) {
-                names.put(extension.getName(), meta);
-            }
+        int size = extensions.size() + 10;
+        this.extensions = new CopyOnWriteArrayList<ExtensionMeta<T, M>>();
+        this.names = new ConcurrentHashMap<M, ExtensionMeta<T, M>>(size);
+        this.multiNames = new ConcurrentHashMap<M, List<ExtensionMeta<T, M>>>(size);
+        for (ExtensionMeta<T, M> meta : extensions) {
+            add(meta);
         }
     }
 
-    protected Object getObject(final ExtensionMeta extension) {
-        if (extension == null) {
-            return null;
-        } else if (extension.isSingleton()) {
-            if (extension.getTarget() == null) {
-                synchronized (extension) {
-                    if (extension.getTarget() == null) {
-                        extension.setTarget(newInstance(extension.getExtension().getClazz()));
-                    }
+    protected void add(final ExtensionMeta<T, M> meta) {
+        if (meta == null) {
+            return;
+        }
+        List<ExtensionMeta<T, M>> metas;
+        List<ExtensionMeta<T, M>> exists;
+        //扩展名称
+        M name = meta.getExtension().getName();
+        if (name != null) {
+            //防止被覆盖
+            names.putIfAbsent(name, meta);
+            metas = multiNames.get(name);
+            if (metas == null) {
+                metas = new CopyOnWriteArrayList<ExtensionMeta<T, M>>();
+                exists = multiNames.putIfAbsent(name, metas);
+                if (exists != null) {
+                    metas = exists;
                 }
+                metas.add(meta);
             }
-            return extension.getTarget();
-        } else {
-            return newInstance(extension.getExtension().getClazz());
         }
+        extensions.add(meta);
     }
 
-    protected Object newInstance(final Class<?> clazz) {
-        try {
-            return clazz.newInstance();
-        } catch (InstantiationException e) {
-            return null;
-        } catch (IllegalAccessException e) {
-            return null;
-        }
+    protected T getObject(final ExtensionMeta<T, M> extension) {
+        return extension == null ? null : extension.getTarget();
     }
 
-    public <T> T getExtension(final Object name) {
-        ExtensionMeta meta = names.get(name);
-        return (T) getObject(meta);
+    @Override
+    public T get(final M name) {
+        return getObject(names.get(name));
     }
 
-    public <T> List<T> getExtensions() {
-        List<T> result = new ArrayList<T>(extensions.size());
-        Object object;
-        for (ExtensionMeta extension : extensions) {
+    @Override
+    public T get() {
+        return getObject(extensions == null || extensions.isEmpty() ? null : extensions.get(0));
+    }
+
+    @Override
+    public Iterable<ExtensionMeta<T, M>> metas() {
+        return extensions;
+    }
+
+    @Override
+    public Iterable<ExtensionMeta<T, M>> metas(M name) {
+        return multiNames.get(name);
+    }
+
+    @Override
+    public ExtensionMeta<T, M> meta(final M name) {
+        return names.get(name);
+    }
+
+    @Override
+    public Iterable<T> extensions() {
+        List<T> result = new LinkedList<T>();
+        T object;
+        for (ExtensionMeta<T, M> extension : extensions) {
             object = getObject(extension);
             if (object != null) {
-                result.add((T) object);
+                result.add(object);
             }
         }
         return result;
     }
 
-    /**
-     * 动态添加扩展点
-     *
-     * @param extensible
-     * @param name
-     * @param target
-     */
-    public boolean addExtension(final Class extensible, final Object name, final Object target) {
-        if (extensible == null || name == null || target == null) {
+    @Override
+    public boolean add(final M name, final T target) {
+        if (name == null || target == null) {
             return false;
         }
-        Class<?> targetClass = target.getClass();
-        ExtensionMeta meta = new ExtensionMeta();
+        Class<T> targetClass = (Class<T>) target.getClass();
+        ExtensionMeta<T, M> meta = new ExtensionMeta();
         meta.setTarget(target);
         meta.setOrder(Ordered.ORDER);
         meta.setName(new Name(targetClass));
-        meta.setExtensible(new Name(extensible));
+        meta.setExtensible(this.name);
         meta.setExtension(new Name(targetClass, name));
         meta.setSingleton(true);
-        extensions.add(meta);
-        names.put(name, meta);
+        add(meta);
         return true;
     }
 
-    public Name getName() {
+    @Override
+    public Name<T, String> getName() {
         return name;
     }
 }

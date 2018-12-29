@@ -1,5 +1,5 @@
 package com.jd.laf.extension;
 
 @Extensible("consumer")
-public interface Consumer {
+public interface Consumer extends Ordered {
 }

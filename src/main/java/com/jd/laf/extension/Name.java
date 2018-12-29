@@ -3,30 +3,27 @@ package com.jd.laf.extension;
 /**
  * 扩展名称
  */
-public class Name {
+public class Name<T, M> {
     // 类型
-    private Class clazz;
+    private Class<T> clazz;
     // 名称
-    private Object name;
+    private M name;
 
-    public Name(Class clazz) {
+    public Name(Class<T> clazz) {
         this.clazz = clazz;
     }
 
-    public Name(Class clazz, Object name) {
+    public Name(Class<T> clazz, M name) {
         this.clazz = clazz;
         this.name = name;
     }
 
-    public Class getClazz() {
+    public Class<T> getClazz() {
         return clazz;
     }
 
-    public Object getName() {
+    public M getName() {
         return name;
     }
 
-    public void setName(Object name) {
-        this.name = name;
-    }
 }

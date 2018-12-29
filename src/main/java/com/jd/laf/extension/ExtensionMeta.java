@@ -12,9 +12,9 @@ public class ExtensionMeta<T, M> {
     protected boolean singleton = true;
     //单例
     protected T target;
-    //可扩展接口名称
-    protected Name<T, String> extensible;
     //扩展点名称
+    protected Name<T, String> extensible;
+    //扩展实现名称
     protected Name<? extends T, M> extension;
     //顺序
     protected int order;

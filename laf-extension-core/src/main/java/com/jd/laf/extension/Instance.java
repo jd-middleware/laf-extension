@@ -12,16 +12,16 @@ public interface Instance {
      * @param <T>
      * @return
      */
-    <T> T newInstance(Name name);
+    <T, M> T newInstance(Name<T, M> name);
 
     class ClazzInstance implements Instance {
 
         public static final Instance INSTANCE = new ClazzInstance();
 
         @Override
-        public <T> T newInstance(final Name name) {
+        public <T, M> T newInstance(final Name<T, M> name) {
             try {
-                return name == null ? null : (T) name.getClazz().newInstance();
+                return name == null ? null : name.getClazz().newInstance();
             } catch (InstantiationException e) {
                 return null;
             } catch (IllegalAccessException e) {

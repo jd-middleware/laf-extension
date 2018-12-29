@@ -46,37 +46,50 @@ public class SpiLoader implements ExtensionLoader {
                                             final List<ExtensionMeta<T, M>> metas,
                                             final Classify<T, M> classify) {
         ServiceLoader<T> plugins = ServiceLoader.load(clazz);
-        int order;
         int last = Ordered.ORDER;
         int count = 0;
         boolean result = false;
         for (T plugin : plugins) {
-            Class<?> serviceClass = plugin.getClass();
-            Name name = new Name(serviceClass);
-            Extension extension = serviceClass.getAnnotation(Extension.class);
-            //执行顺序
-            order = Ordered.class.isAssignableFrom(serviceClass) ?
-                    ((Ordered) plugin).order() : (extension == null ? Ordered.ORDER : extension.order());
-            ExtensionMeta meta = new ExtensionMeta();
-            meta.setExtensible(extensibleName);
-            meta.setTarget(plugin);
-            meta.setExtension(new Name(serviceClass,
-                    classify != null ? classify.type(plugin) :
-                            (Type.class.isAssignableFrom(serviceClass) ? ((Type) plugin).type() :
-                                    (extension != null && extension.value() != null && !extension.value().isEmpty() ? extension.value() :
-                                            serviceClass.getName()))));
-            meta.setSingleton(extension == null ? true : extension.singleton());
-            meta.setOrder(order);
-            meta.setInstance(Instance.ClazzInstance.INSTANCE);
-            meta.setName(name);
+            ExtensionMeta<T, M> meta = build(plugin, extensibleName, classify, Instance.ClazzInstance.INSTANCE);
             metas.add(meta);
-            if (count++ > 0 && order != last) {
+            if (count++ > 0 && meta.getOrder() != last) {
                 //顺序不一样，需要排序
                 result = true;
             }
-            last = order;
+            last = meta.getOrder();
         }
         return result;
+    }
+
+    /**
+     * 构建元数据
+     *
+     * @param plugin
+     * @param extensibleName
+     * @param classify
+     * @param instance
+     * @param <T>
+     * @param <M>
+     * @return
+     */
+    protected <T, M> ExtensionMeta<T, M> build(final T plugin, final Name extensibleName, final Classify<T, M> classify, final Instance instance) {
+        Class<?> serviceClass = plugin.getClass();
+        Name name = new Name(serviceClass);
+        Extension extension = serviceClass.getAnnotation(Extension.class);
+        ExtensionMeta<T, M> meta = new ExtensionMeta<T, M>();
+        meta.setExtensible(extensibleName);
+        meta.setTarget(plugin);
+        meta.setExtension(new Name(serviceClass,
+                classify != null ? classify.type(plugin) :
+                        (Type.class.isAssignableFrom(serviceClass) ? ((Type) plugin).type() :
+                                (extension != null && extension.value() != null && !extension.value().isEmpty() ? extension.value() :
+                                        serviceClass.getName()))));
+        meta.setSingleton(extension == null ? true : extension.singleton());
+        meta.setOrder(Ordered.class.isAssignableFrom(serviceClass) ?
+                ((Ordered) plugin).order() : (extension == null ? Ordered.ORDER : extension.order()));
+        meta.setInstance(instance);
+        meta.setName(name);
+        return meta;
     }
 
 }

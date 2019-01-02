@@ -84,7 +84,7 @@ public class SpiLoader implements ExtensionLoader {
                         (Type.class.isAssignableFrom(serviceClass) ? ((Type) plugin).type() :
                                 (extension != null && extension.value() != null && !extension.value().isEmpty() ? extension.value() :
                                         serviceClass.getName()))));
-        meta.setSingleton(extension == null ? true : extension.singleton());
+        meta.setSingleton(Prototype.class.isAssignableFrom(serviceClass) ? false : (extension == null ? true : extension.singleton()));
         meta.setOrder(Ordered.class.isAssignableFrom(serviceClass) ?
                 ((Ordered) plugin).order() : (extension == null ? Ordered.ORDER : extension.order()));
         meta.setInstance(instance);

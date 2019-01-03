@@ -79,11 +79,6 @@ public class ExtensionPointLazy<T, M> implements ExtensionPoint<T, M> {
     }
 
     @Override
-    public boolean add(M name, T target) {
-        return getDelegate().add(name, target);
-    }
-
-    @Override
     public Name<T, String> getName() {
         return getDelegate().getName();
     }

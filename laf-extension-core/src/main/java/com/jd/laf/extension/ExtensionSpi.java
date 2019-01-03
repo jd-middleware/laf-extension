@@ -19,6 +19,8 @@ public class ExtensionSpi<T, M> implements ExtensionPoint<T, M> {
     protected List<ExtensionMeta<T, M>> extensions;
     //扩展点名称
     protected Name<T, String> name;
+    //缓存默认插件单例实例
+    protected T target;
 
     public ExtensionSpi(final Name<T, String> name, final List<ExtensionMeta<T, M>> extensions) {
         this.name = name;
@@ -66,7 +68,17 @@ public class ExtensionSpi<T, M> implements ExtensionPoint<T, M> {
 
     @Override
     public T get() {
-        return getObject(extensions == null || extensions.isEmpty() ? null : extensions.get(0));
+        if (target == null && !extensions.isEmpty()) {
+            ExtensionMeta<T, M> meta = extensions.get(0);
+            if (meta != null) {
+                if (meta.isSingleton()) {
+                    target = meta.getTarget();
+                } else {
+                    return meta.getTarget();
+                }
+            }
+        }
+        return target;
     }
 
     @Override
@@ -95,23 +107,6 @@ public class ExtensionSpi<T, M> implements ExtensionPoint<T, M> {
             }
         }
         return result;
-    }
-
-    @Override
-    public boolean add(final M name, final T target) {
-        if (name == null || target == null) {
-            return false;
-        }
-        Class<T> targetClass = (Class<T>) target.getClass();
-        ExtensionMeta<T, M> meta = new ExtensionMeta();
-        meta.setTarget(target);
-        meta.setOrder(Ordered.ORDER);
-        meta.setName(new Name(targetClass));
-        meta.setExtensible(this.name);
-        meta.setExtension(new Name(targetClass, name));
-        meta.setSingleton(true);
-        add(meta);
-        return true;
     }
 
     @Override

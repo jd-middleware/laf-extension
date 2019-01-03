@@ -53,15 +53,6 @@ public interface ExtensionPoint<T, M> {
      */
     ExtensionMeta<T, M> meta(M name);
 
-
-    /**
-     * 添加扩展实现
-     *
-     * @param name
-     * @param target
-     */
-    boolean add(final M name, final T target);
-
     /**
      * 扩展点名称
      *

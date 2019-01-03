@@ -44,7 +44,7 @@ public class ExtensionMeta<T, M> {
                     }
                 }
             }
-            return (T) target;
+            return target;
         }
         return instance.newInstance(name);
     }

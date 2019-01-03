@@ -316,22 +316,6 @@ public class ExtensionManager {
     }
 
     /**
-     * 动态添加扩展点
-     *
-     * @param extensible '
-     * @param name
-     * @param target
-     * @return
-     */
-    public static <T, M> boolean add(final Class<T> extensible, final M name, final T target) {
-        ExtensionPoint<T, M> spi = INSTANCE.getExtensionPoint(extensible);
-        if (spi != null) {
-            return spi.add(name, target);
-        }
-        return false;
-    }
-
-    /**
      * 获取插件接口
      *
      * @param extensible

@@ -31,6 +31,13 @@ public interface ExtensionPoint<T, M> {
     Iterable<T> extensions();
 
     /**
+     * 反序获取扩展实现列表
+     *
+     * @return
+     */
+    Iterable<T> reverse();
+
+    /**
      * 扩展元数据迭代
      *
      * @return

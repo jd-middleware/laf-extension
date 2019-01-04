@@ -79,6 +79,11 @@ public class ExtensionPointLazy<T, M> implements ExtensionPoint<T, M> {
     }
 
     @Override
+    public Iterable<T> reverse() {
+        return getDelegate().reverse();
+    }
+
+    @Override
     public Name<T, String> getName() {
         return getDelegate().getName();
     }

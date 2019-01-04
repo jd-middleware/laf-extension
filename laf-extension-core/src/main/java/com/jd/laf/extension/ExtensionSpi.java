@@ -1,5 +1,7 @@
 package com.jd.laf.extension;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -99,6 +101,11 @@ public class ExtensionSpi<T, M> implements ExtensionPoint<T, M> {
     @Override
     public Iterable<T> extensions() {
         List<T> result = new LinkedList<T>();
+        extensions(result);
+        return result;
+    }
+
+    protected void extensions(final List<T> result) {
         T object;
         for (ExtensionMeta<T, M> extension : extensions) {
             object = getObject(extension);
@@ -106,6 +113,13 @@ public class ExtensionSpi<T, M> implements ExtensionPoint<T, M> {
                 result.add(object);
             }
         }
+    }
+
+    @Override
+    public Iterable<T> reverse() {
+        List<T> result = new ArrayList<T>(20);
+        extensions(result);
+        Collections.reverse(result);
         return result;
     }
 

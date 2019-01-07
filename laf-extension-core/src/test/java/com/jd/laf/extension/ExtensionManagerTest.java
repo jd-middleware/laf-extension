@@ -1,7 +1,15 @@
 package com.jd.laf.extension;
 
+import com.jd.laf.extension.Filter.FilterType;
+import com.jd.laf.extension.Selector.CacheSelector;
+import com.jd.laf.extension.Selector.ListSelector;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.List;
+
+import static com.jd.laf.extension.Filter.FilterType.CONSUMER;
+import static com.jd.laf.extension.Filter.FilterType.PROCEDURE;
 
 public class ExtensionManagerTest {
 
@@ -62,5 +70,22 @@ public class ExtensionManagerTest {
         Assert.assertNotNull(c1);
         Assert.assertEquals(c1, sp1.get());
         Assert.assertEquals(c1, c2);
+    }
+
+    @Test
+    public void testListSelector() {
+        ExtensionSelector<Filter, String, FilterType, List<Filter>> selector = new ExtensionSelector<Filter, String, FilterType, List<Filter>>(
+                new ExtensionPointLazy<Filter, String>(Filter.class),
+                new CacheSelector<Filter, String, FilterType, List<Filter>>(
+                        new ListSelector<Filter, String, FilterType>() {
+                            @Override
+                            protected boolean match(Filter target, FilterType condition) {
+                                return condition == CONSUMER ? target.isConsumer() : !target.isConsumer();
+                            }
+                        }));
+        List<Filter> consumers = selector.select(CONSUMER);
+        List<Filter> procedures = selector.select(PROCEDURE);
+        Assert.assertEquals(consumers.size(), 2);
+        Assert.assertEquals(procedures.size(), 1);
     }
 }

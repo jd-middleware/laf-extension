@@ -1,5 +1,7 @@
 package com.jd.laf.extension;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -20,7 +22,6 @@ public interface Selector<T, M, C, K> {
      */
     K select(ExtensionPoint<T, M> extensions, C condition);
 
-
     /**
      * 匹配选择器
      *
@@ -39,6 +40,37 @@ public interface Selector<T, M, C, K> {
                 }
             }
             return null;
+        }
+
+        /**
+         * 判断是否匹配
+         *
+         * @param target
+         * @param condition
+         * @return
+         */
+        protected abstract boolean match(T target, C condition);
+    }
+
+    /**
+     * 列表选择器
+     *
+     * @param <T>
+     * @param <M>
+     */
+    abstract class ListSelector<T, M, C> implements Selector<T, M, C, List<T>> {
+
+        @Override
+        public List<T> select(final ExtensionPoint<T, M> extensions, final C condition) {
+            List<T> result = new LinkedList<T>();
+            T target;
+            for (ExtensionMeta<T, M> meta : extensions.metas()) {
+                target = meta.getTarget();
+                if (target != null && match(target, condition)) {
+                    result.add(target);
+                }
+            }
+            return result;
         }
 
         /**

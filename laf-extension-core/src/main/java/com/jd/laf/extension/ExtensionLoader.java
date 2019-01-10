@@ -3,7 +3,6 @@ package com.jd.laf.extension;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * 扩展点加载器
@@ -22,7 +21,7 @@ public interface ExtensionLoader {
      * 包装器
      */
     class Wrapper implements ExtensionLoader {
-        protected Collection<ExtensionLoader> loaders = new ConcurrentLinkedQueue<ExtensionLoader>();
+        protected List<ExtensionLoader> loaders = new LinkedList<ExtensionLoader>();
 
         public Wrapper(ExtensionLoader... loaders) {
             if (loaders != null) {

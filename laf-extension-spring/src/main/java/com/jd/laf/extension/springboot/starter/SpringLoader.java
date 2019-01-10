@@ -28,9 +28,12 @@ public class SpringLoader extends SpiLoader implements PriorityOrdered, Applicat
         String[] names = context.getBeanNamesForType(clazz);
         int count = 0;
         ExtensionMeta meta;
+        T bean;
         for (String name : names) {
-            meta = build(context.getBean(name, clazz), extensibleName, classify, instance);
+            bean = context.getBean(name, clazz);
+            meta = build(bean, extensibleName, classify, instance);
             meta.setSingleton(context.isSingleton(name));
+            meta.setName(new Name(bean.getClass(), name));
             extensionMetas.add(meta);
             if (count++ > 0 && meta.getOrder() != last) {
                 //顺序不一样，需要排序

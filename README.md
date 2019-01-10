@@ -620,6 +620,21 @@ public class ExtensionSelector<T, M, C, K> {
 </dependency>
 ```
 
+### 实现扩展
+
+可以基于如下方法实现
+
+1. 基于java SPI进行实现，并配置到相关的文件里面。例如JsonProvider的扩展配置如下
+
+src/main/resources/META-INF/services/com.jd.laf.binding.marshaller.JsonProvider
+
+该文件内容为各个扩展实现的全路径类名
+```
+com.jd.laf.web.vertx.marshaller.JacksonProvider
+```
+
+2. 基于Spring注册相关的实现
+
 ### 定义扩展常量
 
 通常建议在工程包的根路径下定义Plugin接口类，在其中定义扩展常量，其它地方引用来获取扩展

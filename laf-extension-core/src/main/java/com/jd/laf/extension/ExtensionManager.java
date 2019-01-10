@@ -1,9 +1,16 @@
 package com.jd.laf.extension;
 
+import com.jd.laf.extension.ExtensionMeta.AscendingComparator;
+import com.jd.laf.extension.Instantiation.ClazzInstance;
+
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
+import static java.util.Collections.sort;
 
 /**
  * 扩展点管理
@@ -75,19 +82,57 @@ public class ExtensionManager {
                                                          final ExtensionLoader loader,
                                                          final Comparator<ExtensionMeta<T, M>> comparator,
                                                          final Classify<T, M> classify) {
-        if (extensible != null) {
-            //判断是否重复添加
-            ExtensionPoint<T, M> ExtensionPoint = getExtensionPoint(extensible);
-            if (ExtensionPoint == null) {
-                ExtensionLoader extensionLoader = loader == null ? this.loader : loader;
-                ExtensionPoint = extensionLoader.load(extensible, comparator, classify);
-                if (ExtensionPoint != null) {
-                    return add(ExtensionPoint);
-                }
-            }
-            return ExtensionPoint;
+        if (extensible == null) {
+            return null;
         }
-        return null;
+        //判断是否重复添加
+        ExtensionPoint<T, M> result = getExtensionPoint(extensible);
+        if (result == null) {
+            //获取扩展点注解
+            Extensible annotation = extensible.getAnnotation(Extensible.class);
+            //构造扩展点名称
+            Name extensibleName = new Name(extensible, annotation != null && annotation.value() != null
+                    && !annotation.value().isEmpty() ? annotation.value() : extensible.getName());
+            //加载插件
+            Collection<Plugin<T>> plugins = loader == null ? this.loader.load(extensible) : loader.load(extensible);
+            List<ExtensionMeta<T, M>> metas = new LinkedList<ExtensionMeta<T, M>>();
+            int count = 0;
+            int last = Ordered.ORDER;
+            boolean sorted = false;
+            for (Plugin<T> plugin : plugins) {
+                Class<?> pluginClass = plugin.name.getClazz();
+                Extension extension = pluginClass.getAnnotation(Extension.class);
+                ExtensionMeta<T, M> meta = new ExtensionMeta<T, M>();
+                meta.setExtensible(extensibleName);
+                meta.setName(plugin.name);
+                meta.setInstantiation(plugin.instantiation == null ? ClazzInstance.INSTANCE : plugin.instantiation);
+                meta.setTarget(plugin.target);
+                meta.setSingleton(plugin.isSingleton() != null ? plugin.isSingleton() :
+                        (Prototype.class.isAssignableFrom(pluginClass) ? false :
+                                (extension == null ? true : extension.singleton())));
+                //获取插件，不存在则创建
+                T target = meta.getTarget();
+                meta.setExtension(new Name(pluginClass, classify != null ? classify.type(target) :
+                        (Type.class.isAssignableFrom(pluginClass) ? ((Type) target).type() :
+                                (extension != null && extension.value() != null && !extension.value().isEmpty() ? extension.value() :
+                                        pluginClass.getName()))));
+                meta.setOrder(Ordered.class.isAssignableFrom(pluginClass) ? ((Ordered) target).order() :
+                        (extension == null ? Ordered.ORDER : extension.order()));
+                metas.add(meta);
+                if (count++ > 0 && meta.getOrder() != last) {
+                    //顺序不一样，需要排序
+                    sorted = true;
+                }
+
+            }
+            //排序
+            if (sorted) {
+                sort(metas, comparator == null ? AscendingComparator.INSTANCE : comparator);
+            }
+
+            result = add(new ExtensionSpi(extensibleName, metas));
+        }
+        return result;
     }
 
     public void loadExtension(final Collection<Class<?>> extensibles) {
@@ -98,7 +143,7 @@ public class ExtensionManager {
         if (extensibles != null) {
             ExtensionLoader extensionLoader = loader == null ? this.loader : loader;
             for (Class extensible : extensibles) {
-                getOrLoadExtensionPoint(extensible, extensionLoader, null);
+                getOrLoadExtensionPoint(extensible, extensionLoader, null, null);
             }
         }
     }
@@ -371,6 +416,18 @@ public class ExtensionManager {
      */
     public static void load(final ExtensionScanner scanner, final ExtensionLoader loader) {
         INSTANCE.loadExtension(scanner, loader);
+    }
+
+    /**
+     * 包装加载器
+     *
+     * @param loader
+     */
+    public static void wrap(final ExtensionLoader loader) {
+        if (loader == null) {
+            return;
+        }
+        INSTANCE.loader = new ExtensionLoader.Wrapper(INSTANCE.loader, loader);
     }
 
 }

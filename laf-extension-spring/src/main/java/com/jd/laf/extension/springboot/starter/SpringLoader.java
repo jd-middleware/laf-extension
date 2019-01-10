@@ -7,41 +7,32 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
  * Spring加载器
  */
-public class SpringLoader extends SpiLoader implements PriorityOrdered, ApplicationContextAware {
+public class SpringLoader implements ExtensionLoader, PriorityOrdered, ApplicationContextAware {
 
     protected ApplicationContext context;
 
-    protected Instance instance;
+    protected Instantiation instance;
 
     @Override
-    protected <T, M> boolean loadExtensions(final Class<T> clazz,
-                                            final Name extensibleName,
-                                            final List<ExtensionMeta<T, M>> extensionMetas,
-                                            final Classify<T, M> classify) {
-        boolean result = super.loadExtensions(clazz, extensibleName, extensionMetas, classify);
-        int last = !extensionMetas.isEmpty() ? extensionMetas.get(0).getOrder() : com.jd.laf.extension.Ordered.ORDER;
-        String[] names = context.getBeanNamesForType(clazz);
-        int count = 0;
-        ExtensionMeta meta;
-        T bean;
-        for (String name : names) {
-            bean = context.getBean(name, clazz);
-            meta = build(bean, extensibleName, classify, instance);
-            meta.setSingleton(context.isSingleton(name));
-            meta.setName(new Name(bean.getClass(), name));
-            extensionMetas.add(meta);
-            if (count++ > 0 && meta.getOrder() != last) {
-                //顺序不一样，需要排序
-                result = true;
-            }
-            last = meta.getOrder();
+    public <T> Collection<Plugin<T>> load(final Class<T> extensible) {
+        if (extensible == null) {
+            return null;
         }
-
+        List<Plugin<T>> result = new LinkedList<Plugin<T>>();
+        String[] names = context.getBeanNamesForType(extensible);
+        if (names != null) {
+            for (String name : names) {
+                T plugin = context.getBean(name, extensible);
+                result.add(new Plugin<T>(new Name(plugin.getClass(), name), instance, context.isSingleton(name), plugin));
+            }
+        }
         return result;
     }
 
@@ -53,7 +44,7 @@ public class SpringLoader extends SpiLoader implements PriorityOrdered, Applicat
     @Override
     public void setApplicationContext(final ApplicationContext context) throws BeansException {
         this.context = context;
-        this.instance = new Instance() {
+        this.instance = new Instantiation() {
             @Override
             public <T, M> T newInstance(final Name<T, M> name) {
                 try {
@@ -63,6 +54,6 @@ public class SpringLoader extends SpiLoader implements PriorityOrdered, Applicat
                 }
             }
         };
-        ExtensionManager.INSTANCE = new ExtensionManager(this);
+        ExtensionManager.wrap(this);
     }
 }

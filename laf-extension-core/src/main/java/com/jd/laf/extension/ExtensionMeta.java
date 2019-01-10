@@ -1,13 +1,16 @@
 package com.jd.laf.extension;
 
+import java.util.Comparator;
+
 /**
  * 扩展点元数据
  */
 public class ExtensionMeta<T, M> {
+
     //实例元数据
     protected Name<? extends T, String> name;
     //实例化接口
-    protected Instance instance;
+    protected Instantiation instantiation;
     //是否是单例
     protected boolean singleton = true;
     //单例
@@ -40,25 +43,25 @@ public class ExtensionMeta<T, M> {
             if (target == null) {
                 synchronized (this) {
                     if (target == null) {
-                        target = instance.newInstance(name);
+                        target = instantiation.newInstance(name);
                     }
                 }
             }
             return target;
         }
-        return instance.newInstance(name);
+        return instantiation.newInstance(name);
     }
 
     public void setTarget(T target) {
         this.target = target;
     }
 
-    public Instance getInstance() {
-        return instance;
+    public Instantiation getInstantiation() {
+        return instantiation;
     }
 
-    public void setInstance(Instance instance) {
-        this.instance = instance;
+    public void setInstantiation(Instantiation instantiation) {
+        this.instantiation = instantiation;
     }
 
     public Name<T, String> getExtensible() {
@@ -83,6 +86,19 @@ public class ExtensionMeta<T, M> {
 
     public void setOrder(int order) {
         this.order = order;
+    }
+
+    /**
+     * 升序排序
+     */
+    static class AscendingComparator implements Comparator<ExtensionMeta> {
+
+        public static final Comparator INSTANCE = new AscendingComparator();
+
+        @Override
+        public int compare(ExtensionMeta o1, ExtensionMeta o2) {
+            return o1.getOrder() - o2.getOrder();
+        }
     }
 
 }

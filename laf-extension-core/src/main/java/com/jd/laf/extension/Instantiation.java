@@ -3,7 +3,7 @@ package com.jd.laf.extension;
 /**
  * 实例化接口
  */
-public interface Instance {
+public interface Instantiation {
 
     /**
      * 构建实例
@@ -14,9 +14,9 @@ public interface Instance {
      */
     <T, M> T newInstance(Name<T, M> name);
 
-    class ClazzInstance implements Instance {
+    class ClazzInstance implements Instantiation {
 
-        public static final Instance INSTANCE = new ClazzInstance();
+        public static final Instantiation INSTANCE = new ClazzInstance();
 
         @Override
         public <T, M> T newInstance(final Name<T, M> name) {

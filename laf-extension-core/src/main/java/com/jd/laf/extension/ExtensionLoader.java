@@ -1,8 +1,8 @@
 package com.jd.laf.extension;
 
 import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * 扩展点加载器
@@ -21,7 +21,7 @@ public interface ExtensionLoader {
      * 包装器
      */
     class Wrapper implements ExtensionLoader {
-        protected List<ExtensionLoader> loaders = new LinkedList<ExtensionLoader>();
+        protected Set<ExtensionLoader> loaders = new LinkedHashSet<ExtensionLoader>();
 
         public Wrapper(ExtensionLoader... loaders) {
             if (loaders != null) {
@@ -38,7 +38,8 @@ public interface ExtensionLoader {
         @Override
         public <T> Collection<Plugin<T>> load(final Class<T> extensible) {
 
-            List<Plugin<T>> result = new LinkedList<Plugin<T>>();
+            //多个插件加载器，避免加载相同的实例，做了去重
+            Set<Plugin<T>> result = new LinkedHashSet<Plugin<T>>();
 
             if (loaders != null) {
                 for (ExtensionLoader loader : loaders) {

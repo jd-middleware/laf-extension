@@ -1,8 +1,6 @@
 package com.jd.laf.extension;
 
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 扩展点加载器
@@ -39,7 +37,7 @@ public interface ExtensionLoader {
         public <T> Collection<Plugin<T>> load(final Class<T> extensible) {
 
             //多个插件加载器，避免加载相同的实例，做了去重
-            Set<Plugin<T>> result = new LinkedHashSet<Plugin<T>>();
+            List<Plugin<T>> result = new LinkedList<Plugin<T>>();
 
             if (loaders != null) {
                 for (ExtensionLoader loader : loaders) {

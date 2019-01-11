@@ -53,8 +53,8 @@ public class ExtensionSpi<T, M> implements ExtensionPoint<T, M> {
                 if (exists != null) {
                     metas = exists;
                 }
-                metas.add(meta);
             }
+            metas.add(meta);
         }
         extensions.add(meta);
     }

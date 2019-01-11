@@ -21,15 +21,31 @@ public interface ExtensionLoader {
     class Wrapper implements ExtensionLoader {
         protected Set<ExtensionLoader> loaders = new LinkedHashSet<ExtensionLoader>();
 
-        public Wrapper(ExtensionLoader... loaders) {
+        public Wrapper(final ExtensionLoader... loaders) {
+            this(null, loaders);
+        }
+
+        public Wrapper(final Set<ExtensionLoader> excludes, final ExtensionLoader... loaders) {
             if (loaders != null) {
                 for (ExtensionLoader loader : loaders) {
                     if (loader instanceof Wrapper) {
-                        this.loaders.addAll(((Wrapper) loader).loaders);
+                        add(excludes, ((Wrapper) loader).loaders);
                     } else {
-                        this.loaders.add(loader);
+                        add(excludes, loader);
                     }
                 }
+            }
+        }
+
+        protected void add(final Set<ExtensionLoader> excludes, final Collection<ExtensionLoader> loaders) {
+            for (ExtensionLoader loader : loaders) {
+                add(excludes, loader);
+            }
+        }
+
+        protected void add(final Set<ExtensionLoader> excludes, final ExtensionLoader loader) {
+            if (excludes == null || !excludes.contains(loader)) {
+                loaders.add(loader);
             }
         }
 

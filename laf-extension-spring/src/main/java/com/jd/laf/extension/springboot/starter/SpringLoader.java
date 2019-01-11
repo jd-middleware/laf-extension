@@ -4,6 +4,9 @@ import com.jd.laf.extension.*;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 
@@ -14,7 +17,7 @@ import java.util.List;
 /**
  * Spring加载器
  */
-public class SpringLoader implements ExtensionLoader, PriorityOrdered, ApplicationContextAware {
+public class SpringLoader implements ExtensionLoader, PriorityOrdered, ApplicationContextAware, ApplicationListener {
 
     protected ApplicationContext context;
 
@@ -54,6 +57,15 @@ public class SpringLoader implements ExtensionLoader, PriorityOrdered, Applicati
                 }
             }
         };
-        ExtensionManager.wrap(this);
+        //注册当前插件加载器
+        ExtensionManager.register(this);
+    }
+
+    @Override
+    public void onApplicationEvent(final ApplicationEvent event) {
+        if (event instanceof ContextClosedEvent) {
+            //容器停止的时候，注销当前插件加载器
+            ExtensionManager.deregister(this);
+        }
     }
 }

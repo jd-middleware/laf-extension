@@ -3,10 +3,7 @@ package com.jd.laf.extension;
 import com.jd.laf.extension.ExtensionMeta.AscendingComparator;
 import com.jd.laf.extension.Instantiation.ClazzInstance;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -419,15 +416,40 @@ public class ExtensionManager {
     }
 
     /**
-     * 包装加载器
+     * 注册插件加载器
+     *
+     * @param loader
+     * @see ExtensionManager#register(com.jd.laf.extension.ExtensionLoader)
+     */
+    @Deprecated
+    public static void wrap(final ExtensionLoader loader) {
+        register(loader);
+    }
+
+    /**
+     * 注册插件加载器
      *
      * @param loader
      */
-    public static void wrap(final ExtensionLoader loader) {
+    public static void register(final ExtensionLoader loader) {
         if (loader == null) {
             return;
         }
         INSTANCE.loader = new ExtensionLoader.Wrapper(INSTANCE.loader, loader);
+    }
+
+    /**
+     * 注销插件加载器
+     *
+     * @param loader
+     */
+    public static void deregister(final ExtensionLoader loader) {
+        if (loader == null) {
+            return;
+        }
+        Set<ExtensionLoader> excludes = new HashSet<ExtensionLoader>();
+        excludes.add(loader);
+        INSTANCE.loader = new ExtensionLoader.Wrapper(excludes, INSTANCE.loader);
     }
 
 }

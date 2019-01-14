@@ -65,7 +65,9 @@ public class SpringLoader implements ExtensionLoader, PriorityOrdered, Applicati
     public void onApplicationEvent(final ApplicationEvent event) {
         if (event instanceof ContextClosedEvent) {
             //容器停止的时候，注销当前插件加载器
-            ExtensionManager.deregister(this);
+            if (event.getSource() == context) {
+                ExtensionManager.deregister(this);
+            }
         }
     }
 }

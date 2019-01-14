@@ -16,77 +16,11 @@ import static java.util.Collections.sort;
 /**
  * 扩展点管理
  */
-public class ExtensionManager {
-    public static final ExtensionManager INSTANCE = new ExtensionManager();
-
+public abstract class ExtensionManager {
     //扩展点快照
-    protected volatile Snapshot snapshot;
+    protected static volatile Snapshot SNAPSHOT = new Snapshot(SpiLoader.INSTANCE);
 
-    protected List<ExtensionListener> listeners = new CopyOnWriteArrayList<ExtensionListener>();
-
-    public ExtensionManager() {
-        this(SpiLoader.INSTANCE);
-    }
-
-    public ExtensionManager(ExtensionScanner scanner, ExtensionLoader loader) {
-        this(loader);
-        loadExtension(scanner);
-    }
-
-    public ExtensionManager(ExtensionLoader loader) {
-        snapshot = new Snapshot(loader);
-    }
-
-    public ExtensionManager(Collection<Class<?>> extensibles) {
-        this(SpiLoader.INSTANCE);
-        loadExtension(extensibles, null);
-    }
-
-    public ExtensionManager(Collection<Class<?>> extensibles, ExtensionLoader loader) {
-        this(loader);
-        loadExtension(extensibles, loader);
-    }
-
-    public <T, M> ExtensionPoint<T, M> getOrLoadExtensionPoint(final Class<T> extensible) {
-        return snapshot.getOrLoadExtensionPoint(extensible, null, AscendingComparator.INSTANCE, null);
-    }
-
-    public <T, M> ExtensionPoint<T, M> getOrLoadExtensionPoint(final Class<T> extensible, final ExtensionLoader loader) {
-        return snapshot.getOrLoadExtensionPoint(extensible, loader, AscendingComparator.INSTANCE, null);
-    }
-
-    public <T, M> ExtensionPoint<T, M> getOrLoadExtensionPoint(final Class<T> extensible, final Comparator<ExtensionMeta<T, M>> comparator) {
-        return snapshot.getOrLoadExtensionPoint(extensible, null, comparator, null);
-    }
-
-    public <T, M> ExtensionPoint<T, M> getOrLoadExtensionPoint(final Class<T> extensible, final ExtensionLoader loader, final Comparator<ExtensionMeta<T, M>> comparator) {
-        return snapshot.getOrLoadExtensionPoint(extensible, loader, comparator, null);
-    }
-
-    public <T, M> ExtensionPoint getOrLoadExtensionPoint(final Class<T> extensible,
-                                                         final ExtensionLoader loader,
-                                                         final Comparator<ExtensionMeta<T, M>> comparator,
-                                                         final Classify<T, M> classify) {
-        return snapshot.getOrLoadExtensionPoint(extensible, loader, comparator, classify);
-    }
-
-    public void loadExtension(final Collection<Class<?>> extensibles) {
-        snapshot.loadExtension(extensibles);
-    }
-
-    public void loadExtension(final Collection<Class<?>> extensibles, final ExtensionLoader loader) {
-        snapshot.loadExtension(extensibles, loader);
-    }
-
-    public void loadExtension(final ExtensionScanner scanner) {
-        loadExtension(scanner, null);
-    }
-
-    public void loadExtension(final ExtensionScanner scanner, final ExtensionLoader loader) {
-        if (scanner != null) {
-            loadExtension(scanner.scan(), loader);
-        }
-    }
+    protected static List<ExtensionListener> LISTENERS = new CopyOnWriteArrayList<ExtensionListener>();
 
     /**
      * 获取扩展实现
@@ -94,10 +28,11 @@ public class ExtensionManager {
      * @param type 类型
      * @param name 扩展名称
      * @param <T>
+     * @param <M>
      * @return
      */
-    public <T, M> T getExtension(final String type, final M name) {
-        return snapshot.getExtension(type, name);
+    public static <T, M> T getExtension(final String type, final M name) {
+        return SNAPSHOT.getExtension(type, name);
     }
 
     /**
@@ -105,11 +40,12 @@ public class ExtensionManager {
      *
      * @param extensible 扩展点类
      * @param name       扩展名称
-     * @param <T>        扩展实现
+     * @param <T>
+     * @param <M>
      * @return
      */
-    public <T> T getExtension(final Class<T> extensible, final Object name) {
-        ExtensionPoint spi = getExtensionPoint(extensible);
+    public static <T, M> T getExtension(final Class<T> extensible, final M name) {
+        ExtensionPoint spi = SNAPSHOT.getExtensionPoint(extensible);
         return spi == null ? null : (T) spi.get(name);
     }
 
@@ -118,24 +54,25 @@ public class ExtensionManager {
      *
      * @param extensible 扩展点类
      * @param name       扩展名称
-     * @param <T>        扩展实现
+     * @param <T>
+     * @param <M>
      * @return
      */
-    public <T, M> T getOrLoadExtension(final Class<T> extensible, final M name) {
-        ExtensionPoint<T, M> spi = getOrLoadExtensionPoint(extensible);
-        return spi == null ? null : spi.get(name);
+    public static <T, M> T getOrLoadExtension(final Class<T> extensible, final M name) {
+        ExtensionPoint spi = SNAPSHOT.getOrLoadExtensionPoint(extensible, null, AscendingComparator.INSTANCE, null);
+        return spi == null ? null : (T) spi.get(name);
     }
 
     /**
-     * 获取或加载扩展实现，并返回第一个实现
+     * 获取或加载扩展实现
      *
      * @param extensible 扩展点类
      * @param <T>        扩展实现
      * @return
      */
-    public <T, M> T getOrLoadExtension(final Class<T> extensible) {
-        ExtensionPoint<T, M> spi = getOrLoadExtensionPoint(extensible);
-        return spi == null ? null : spi.get();
+    public static <T> T getOrLoadExtension(final Class<T> extensible) {
+        ExtensionPoint spi = SNAPSHOT.getOrLoadExtensionPoint(extensible, null, AscendingComparator.INSTANCE, null);
+        return spi == null ? null : (T) spi.get();
     }
 
     /**
@@ -145,8 +82,8 @@ public class ExtensionManager {
      * @param <T>
      * @return
      */
-    public <T, M> Iterable<T> getExtensions(final Class<T> extensible) {
-        ExtensionPoint<T, M> spi = getExtensionPoint(extensible);
+    public static <T> Iterable<T> getExtensions(final Class<T> extensible) {
+        ExtensionPoint spi = SNAPSHOT.getExtensionPoint(extensible);
         return spi == null ? null : spi.extensions();
     }
 
@@ -157,115 +94,9 @@ public class ExtensionManager {
      * @param <T>
      * @return
      */
-    public <T> Iterable<T> getOrLoadExtensions(final Class<T> extensible) {
-        ExtensionPoint<T, ?> spi = getOrLoadExtensionPoint(extensible);
+    public static <T> Iterable<T> getOrLoadExtensions(final Class<T> extensible) {
+        ExtensionPoint spi = SNAPSHOT.getOrLoadExtensionPoint(extensible, null, AscendingComparator.INSTANCE, null);
         return spi == null ? null : spi.extensions();
-    }
-
-    /**
-     * 获取扩展点实现
-     *
-     * @param type 类型
-     * @param <T>
-     * @return
-     */
-    public <T, M> Iterable<T> getExtensions(final String type) {
-        return snapshot.getExtensions(type);
-    }
-
-    /**
-     * 获取插件接口
-     *
-     * @param extensible
-     * @return
-     */
-    public <T, M> ExtensionPoint<T, M> getExtensionPoint(final Class<T> extensible) {
-        return snapshot.getExtensionPoint(extensible);
-    }
-
-    /**
-     * 添加监听器
-     *
-     * @param listener
-     * @return
-     */
-    public boolean add(final ExtensionListener listener) {
-        if (listener == null) {
-            return false;
-        }
-        return listeners.add(listener);
-    }
-
-    /**
-     * 获取扩展实现
-     *
-     * @param type 类型
-     * @param name 扩展名称
-     * @param <T>
-     * @param <M>
-     * @return
-     */
-    public static <T, M> T get(final String type, final M name) {
-        return INSTANCE.getExtension(type, name);
-    }
-
-    /**
-     * 获取扩展实现
-     *
-     * @param extensible 扩展点类
-     * @param name       扩展名称
-     * @param <T>
-     * @param <M>
-     * @return
-     */
-    public static <T, M> T get(final Class<T> extensible, final M name) {
-        return INSTANCE.getExtension(extensible, name);
-    }
-
-    /**
-     * 获取或加载扩展实现
-     *
-     * @param extensible 扩展点类
-     * @param name       扩展名称
-     * @param <T>
-     * @param <M>
-     * @return
-     */
-    public static <T, M> T getOrLoad(final Class<T> extensible, final M name) {
-        return INSTANCE.getOrLoadExtension(extensible, name);
-    }
-
-    /**
-     * 获取或加载扩展实现
-     *
-     * @param extensible 扩展点类
-     * @param <T>        扩展实现
-     * @return
-     */
-    public static <T> T getOrLoad(final Class<T> extensible) {
-        return INSTANCE.getOrLoadExtension(extensible);
-    }
-
-    /**
-     * 获取扩展实现
-     *
-     * @param extensible 扩展点类型
-     * @param <T>
-     * @return
-     */
-    public static <T> Iterable<T> get(final Class<T> extensible) {
-        return INSTANCE.getExtensions(extensible);
-    }
-
-    /**
-     * 获取扩展实现
-     *
-     * @param extensible 扩展点类型
-     * @param <T>
-     * @return
-     */
-    public static <T> Iterable<T> getOrLoadAll(final Class<T> extensible) {
-        return INSTANCE.getOrLoadExtensions(extensible);
     }
 
     /**
@@ -276,55 +107,108 @@ public class ExtensionManager {
      * @return
      */
     public static <T> Iterable<T> get(final String type) {
-        return INSTANCE.getExtensions(type);
+        return SNAPSHOT.getExtensions(type);
     }
 
     /**
-     * 获取插件接口
+     * 获取扩展点
      *
      * @param extensible
      * @return
      */
-    public static <T, M> ExtensionPoint<T, M> getSpi(final Class<T> extensible) {
-        return INSTANCE.getExtensionPoint(extensible);
+    public static <T, M> ExtensionPoint<T, M> getOrLoadExtensionPoint(final Class<T> extensible) {
+        return SNAPSHOT.getOrLoadExtensionPoint(extensible, null, AscendingComparator.INSTANCE, null);
     }
 
-    public static <T, M> ExtensionPoint<T, M> getOrLoadSpi(final Class<T> extensible) {
-        return INSTANCE.getOrLoadExtensionPoint(extensible);
+    /**
+     * 获取扩展点
+     *
+     * @param extensible
+     * @param loader
+     * @param <T>
+     * @param <M>
+     * @return
+     */
+    public static <T, M> ExtensionPoint<T, M> getOrLoadExtensionPoint(final Class<T> extensible, final ExtensionLoader loader) {
+        return SNAPSHOT.getOrLoadExtensionPoint(extensible, loader, AscendingComparator.INSTANCE, null);
     }
 
-    public static <T, M> ExtensionPoint<T, M> getOrLoadSpi(final Class<T> extensible, final ExtensionLoader loader) {
-        return INSTANCE.getOrLoadExtensionPoint(extensible, loader);
+    /**
+     * 获取扩展点
+     *
+     * @param extensible
+     * @param comparator
+     * @param <T>
+     * @param <M>
+     * @return
+     */
+    public static <T, M> ExtensionPoint<T, M> getOrLoadExtensionPoint(final Class<T> extensible,
+                                                                      final Comparator<ExtensionMeta<T, M>> comparator) {
+        return SNAPSHOT.getOrLoadExtensionPoint(extensible, null, comparator, null);
     }
 
-    public static <T, M> ExtensionPoint<T, M> getOrLoadSpi(final Class<T> extensible,
-                                                           final Comparator<ExtensionMeta<T, M>> comparator) {
-        return INSTANCE.getOrLoadExtensionPoint(extensible, comparator);
+    /**
+     * 获取扩展点
+     *
+     * @param extensible
+     * @param loader
+     * @param comparator
+     * @param <T>
+     * @param <M>
+     * @return
+     */
+    public static <T, M> ExtensionPoint<T, M> getOrLoadExtensionPoint(final Class<T> extensible,
+                                                                      final ExtensionLoader loader,
+                                                                      final Comparator<ExtensionMeta<T, M>> comparator) {
+        return SNAPSHOT.getOrLoadExtensionPoint(extensible, loader, comparator, null);
     }
 
-    public static <T, M> ExtensionPoint<T, M> getOrLoadSpi(final Class<T> extensible,
-                                                           final ExtensionLoader loader,
-                                                           final Comparator<ExtensionMeta<T, M>> comparator) {
-        return INSTANCE.getOrLoadExtensionPoint(extensible, loader, comparator);
+    /**
+     * 获取扩展点
+     *
+     * @param extensible
+     * @param loader
+     * @param comparator
+     * @param classify
+     * @param <T>
+     * @param <M>
+     * @return
+     */
+    public static <T, M> ExtensionPoint<T, M> getOrLoadExtensionPoint(final Class<T> extensible,
+                                                                      final ExtensionLoader loader,
+                                                                      final Comparator<ExtensionMeta<T, M>> comparator,
+                                                                      final Classify<T, M> classify) {
+        return SNAPSHOT.getOrLoadExtensionPoint(extensible, loader, comparator, classify);
     }
 
-    public static <T, M> ExtensionPoint<T, M> getOrLoadSpi(final Class<T> extensible,
-                                                           final ExtensionLoader loader,
-                                                           final Comparator<ExtensionMeta<T, M>> comparator,
-                                                           final Classify<T, M> classify) {
-        return INSTANCE.getOrLoadExtensionPoint(extensible, loader, comparator, classify);
+    /**
+     * 加载扩展点
+     *
+     * @param extensibles
+     */
+    public static void loadExtension(final Collection<Class<?>> extensibles) {
+        SNAPSHOT.loadExtension(extensibles);
     }
 
-    public static void load(final Collection<Class<?>> extensibles) {
-        INSTANCE.loadExtension(extensibles);
+    /**
+     * 加载扩展点
+     *
+     * @param extensibles
+     * @param loader
+     */
+    public static void loadExtension(final Collection<Class<?>> extensibles, final ExtensionLoader loader) {
+        SNAPSHOT.loadExtension(extensibles, loader);
     }
 
-    public static void load(final Collection<Class<?>> extensibles, final ExtensionLoader loader) {
-        INSTANCE.loadExtension(extensibles, loader);
-    }
-
-    public static void load(final ExtensionScanner scanner) {
-        INSTANCE.loadExtension(scanner);
+    /**
+     * 加载扩展点
+     *
+     * @param scanner
+     */
+    public static void loadExtension(final ExtensionScanner scanner) {
+        if (scanner != null) {
+            SNAPSHOT.loadExtension(scanner.scan());
+        }
     }
 
     /**
@@ -333,19 +217,10 @@ public class ExtensionManager {
      * @param scanner
      * @param loader
      */
-    public static void load(final ExtensionScanner scanner, final ExtensionLoader loader) {
-        INSTANCE.loadExtension(scanner, loader);
-    }
-
-    /**
-     * 注册插件加载器
-     *
-     * @param loader
-     * @see ExtensionManager#register(com.jd.laf.extension.ExtensionLoader)
-     */
-    @Deprecated
-    public static void wrap(final ExtensionLoader loader) {
-        register(loader);
+    public static void loadExtension(final ExtensionScanner scanner, final ExtensionLoader loader) {
+        if (scanner != null) {
+            SNAPSHOT.loadExtension(scanner.scan(), loader);
+        }
     }
 
     /**
@@ -354,13 +229,20 @@ public class ExtensionManager {
      * @param loader
      */
     public synchronized static void register(final ExtensionLoader loader) {
-        Snapshot old = INSTANCE.snapshot;
-        Snapshot snapshot = old.register(loader);
-        boolean flag = old == snapshot;
+        apply(SNAPSHOT.register(loader));
+    }
+
+    /**
+     * 比较
+     *
+     * @param snapshot
+     */
+    protected static void apply(final Snapshot snapshot) {
+        boolean flag = SNAPSHOT == snapshot;
         if (!flag) {
-            INSTANCE.snapshot = snapshot;
-            for (ExtensionListener listener : INSTANCE.listeners) {
-                listener.onEvent(new LoaderEvent(INSTANCE));
+            SNAPSHOT = snapshot;
+            for (ExtensionListener listener : LISTENERS) {
+                listener.onEvent(new LoaderEvent(SNAPSHOT));
             }
         }
     }
@@ -371,15 +253,7 @@ public class ExtensionManager {
      * @param loader
      */
     public synchronized static void deregister(final ExtensionLoader loader) {
-        Snapshot old = INSTANCE.snapshot;
-        Snapshot snapshot = old.deregister(loader);
-        boolean flag = old == snapshot;
-        if (!flag) {
-            INSTANCE.snapshot = snapshot;
-            for (ExtensionListener listener : INSTANCE.listeners) {
-                listener.onEvent(new LoaderEvent(INSTANCE));
-            }
-        }
+        apply(SNAPSHOT.deregister(loader));
     }
 
     /**
@@ -389,7 +263,10 @@ public class ExtensionManager {
      * @return
      */
     public static boolean addListener(final ExtensionListener listener) {
-        return INSTANCE.add(listener);
+        if (listener == null) {
+            return false;
+        }
+        return LISTENERS.add(listener);
     }
 
     /**

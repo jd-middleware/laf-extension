@@ -15,26 +15,26 @@ public class ExtensionManagerTest {
 
     @Test
     public void testGetOrLoadSpi() {
-        ExtensionPoint spi1 = ExtensionManager.getOrLoadSpi(Consumer.class);
-        ExtensionPoint spi2 = ExtensionManager.getOrLoadSpi(Consumer.class);
+        ExtensionPoint spi1 = ExtensionManager.getOrLoadExtensionPoint(Consumer.class);
+        ExtensionPoint spi2 = ExtensionManager.getOrLoadExtensionPoint(Consumer.class);
         Assert.assertNotNull(spi1);
         Assert.assertEquals(spi1, spi2);
     }
 
     @Test
     public void testGetOrLoad() {
-        Consumer c1 = ExtensionManager.getOrLoad(Consumer.class);
-        Consumer c2 = ExtensionManager.getOrLoad(Consumer.class);
+        Consumer c1 = ExtensionManager.getOrLoadExtension(Consumer.class);
+        Consumer c2 = ExtensionManager.getOrLoadExtension(Consumer.class);
         Assert.assertNotNull(c1);
         Assert.assertEquals(c1, c2);
     }
 
     @Test
     public void testGet() {
-        ExtensionManager.getOrLoadSpi(Consumer.class);
-        Consumer c1 = ExtensionManager.get(Consumer.class, "myConsumer");
-        Consumer c2 = ExtensionManager.get(Consumer.class, "myConsumer");
-        Consumer c3 = ExtensionManager.get("consumer", "myConsumer");
+        ExtensionManager.getOrLoadExtensionPoint(Consumer.class);
+        Consumer c1 = ExtensionManager.getExtension(Consumer.class, "myConsumer");
+        Consumer c2 = ExtensionManager.getExtension(Consumer.class, "myConsumer");
+        Consumer c3 = ExtensionManager.getExtension("consumer", "myConsumer");
         Assert.assertNotNull(c1);
         Assert.assertEquals(c1, c2);
         Assert.assertEquals(c1, c3);
@@ -42,22 +42,22 @@ public class ExtensionManagerTest {
 
     @Test
     public void testSelector() {
-        ExtensionPoint spi1 = ExtensionManager.getOrLoadSpi(Consumer.class);
+        ExtensionPoint spi1 = ExtensionManager.getOrLoadExtensionPoint(Consumer.class);
         ExtensionSelector<Consumer, String, Integer, Consumer> selector = new ExtensionSelector(spi1, new Selector.MatchSelector<Consumer, String, Integer>() {
             @Override
             protected boolean match(Consumer target, Integer condition) {
                 return target.order() == condition;
             }
         });
-        Consumer c1 = ExtensionManager.get(Consumer.class, "myConsumer");
+        Consumer c1 = ExtensionManager.getExtension(Consumer.class, "myConsumer");
         Assert.assertEquals(c1, selector.select(Ordered.ORDER));
     }
 
     @Test
     public void testPrototype() {
-        Producer producer1 = ExtensionManager.getOrLoad(Producer.class, "com.jd.laf.extension.MyProducer");
+        Producer producer1 = ExtensionManager.getOrLoadExtension(Producer.class, "com.jd.laf.extension.MyProducer");
         Assert.assertNotNull(producer1);
-        Producer producer2 = ExtensionManager.getOrLoad(Producer.class, "com.jd.laf.extension.MyProducer");
+        Producer producer2 = ExtensionManager.getOrLoadExtension(Producer.class, "com.jd.laf.extension.MyProducer");
         Assert.assertNotEquals(producer1, producer2);
     }
 

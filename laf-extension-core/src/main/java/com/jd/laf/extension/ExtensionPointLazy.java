@@ -54,7 +54,7 @@ public class ExtensionPointLazy<T, M> implements ExtensionPoint<T, M> {
                             }
                         }
                     });
-                    delegate = ExtensionManager.getOrLoadSpi(extensible, loader, comparator, classify);
+                    delegate = ExtensionManager.getOrLoadExtensionPoint(extensible, loader, comparator, classify);
                 }
             }
         }

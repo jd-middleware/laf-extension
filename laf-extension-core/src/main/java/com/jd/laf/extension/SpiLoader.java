@@ -20,7 +20,7 @@ public class SpiLoader implements ExtensionLoader {
         List<Plugin<T>> result = new LinkedList<Plugin<T>>();
         ServiceLoader<T> plugins = ServiceLoader.load(clazz);
         for (T plugin : plugins) {
-            result.add(new Plugin<T>(new Name(plugin.getClass()), plugin));
+            result.add(new Plugin<T>(new Name(plugin.getClass()), plugin, this));
         }
         return result;
     }

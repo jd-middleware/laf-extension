@@ -22,29 +22,29 @@ public interface ExtensionLoader {
         protected Set<ExtensionLoader> loaders = new LinkedHashSet<ExtensionLoader>();
 
         public Wrapper(final ExtensionLoader... loaders) {
-            this(null, loaders);
-        }
-
-        public Wrapper(final Set<ExtensionLoader> excludes, final ExtensionLoader... loaders) {
             if (loaders != null) {
                 for (ExtensionLoader loader : loaders) {
-                    if (loader instanceof Wrapper) {
-                        add(excludes, ((Wrapper) loader).loaders);
-                    } else {
-                        add(excludes, loader);
-                    }
+                    add(loader);
                 }
             }
         }
 
-        protected void add(final Set<ExtensionLoader> excludes, final Collection<ExtensionLoader> loaders) {
-            for (ExtensionLoader loader : loaders) {
-                add(excludes, loader);
+        public Wrapper(final Collection<ExtensionLoader> loaders) {
+            if (loaders != null) {
+                for (ExtensionLoader loader : loaders) {
+                    add(loader);
+                }
             }
         }
 
-        protected void add(final Set<ExtensionLoader> excludes, final ExtensionLoader loader) {
-            if (excludes == null || !excludes.contains(loader)) {
+        protected void add(final ExtensionLoader loader) {
+            if (loader == null) {
+                return;
+            } else if (loader instanceof Wrapper) {
+                for (ExtensionLoader l : ((Wrapper) loader).loaders) {
+                    add(l);
+                }
+            } else {
                 loaders.add(loader);
             }
         }

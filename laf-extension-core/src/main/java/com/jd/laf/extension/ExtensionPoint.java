@@ -24,6 +24,13 @@ public interface ExtensionPoint<T, M> {
     T get();
 
     /**
+     * 记录数
+     *
+     * @return
+     */
+    int size();
+
+    /**
      * 获取扩展实现列表
      *
      * @return

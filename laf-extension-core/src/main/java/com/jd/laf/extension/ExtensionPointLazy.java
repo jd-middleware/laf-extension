@@ -1,5 +1,9 @@
 package com.jd.laf.extension;
 
+import com.jd.laf.extension.listener.ExtensionEvent;
+import com.jd.laf.extension.listener.ExtensionListener;
+import com.jd.laf.extension.listener.LoaderEvent;
+
 import java.util.Comparator;
 
 /**
@@ -10,7 +14,7 @@ import java.util.Comparator;
  */
 public class ExtensionPointLazy<T, M> implements ExtensionPoint<T, M> {
 
-    protected ExtensionPoint<T, M> delegate;
+    protected volatile ExtensionPoint<T, M> delegate;
 
     protected final Class<T> extensible;
     protected final ExtensionLoader loader;
@@ -41,6 +45,15 @@ public class ExtensionPointLazy<T, M> implements ExtensionPoint<T, M> {
         if (delegate == null) {
             synchronized (extensible) {
                 if (delegate == null) {
+                    //监听扩展点加载器变更事件，需要重新获取插件
+                    ExtensionManager.addListener(new ExtensionListener() {
+                        @Override
+                        public void onEvent(final ExtensionEvent event) {
+                            if (event instanceof LoaderEvent) {
+                                delegate = null;
+                            }
+                        }
+                    });
                     delegate = ExtensionManager.getOrLoadSpi(extensible, loader, comparator, classify);
                 }
             }
@@ -71,6 +84,11 @@ public class ExtensionPointLazy<T, M> implements ExtensionPoint<T, M> {
     @Override
     public ExtensionMeta<T, M> meta(final M name) {
         return getDelegate().meta(name);
+    }
+
+    @Override
+    public int size() {
+        return getDelegate().size();
     }
 
     @Override

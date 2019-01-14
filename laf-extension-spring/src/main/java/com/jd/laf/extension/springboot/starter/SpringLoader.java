@@ -33,7 +33,7 @@ public class SpringLoader implements ExtensionLoader, PriorityOrdered, Applicati
         if (names != null) {
             for (String name : names) {
                 T plugin = context.getBean(name, extensible);
-                result.add(new Plugin<T>(new Name(plugin.getClass(), name), instance, context.isSingleton(name), plugin));
+                result.add(new Plugin<T>(new Name(plugin.getClass(), name), instance, context.isSingleton(name), plugin, this));
             }
         }
         return result;

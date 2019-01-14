@@ -1,9 +1,6 @@
 package com.jd.laf.extension;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -23,13 +20,20 @@ public class ExtensionSpi<T, M> implements ExtensionPoint<T, M> {
     protected Name<T, String> name;
     //缓存默认插件单例实例
     protected T target;
+    //比较器
+    protected Comparator<ExtensionMeta<T, M>> comparator;
+    //分类器
+    protected Classify<T, M> classify;
 
-    public ExtensionSpi(final Name<T, String> name, final List<ExtensionMeta<T, M>> extensions) {
+    public ExtensionSpi(final Name<T, String> name, final List<ExtensionMeta<T, M>> extensions,
+                        final Comparator<ExtensionMeta<T, M>> comparator, final Classify<T, M> classify) {
         this.name = name;
         int size = extensions.size() + 10;
-        this.extensions = new CopyOnWriteArrayList<ExtensionMeta<T, M>>();
+        this.extensions = new LinkedList<ExtensionMeta<T, M>>();
         this.names = new ConcurrentHashMap<M, ExtensionMeta<T, M>>(size);
         this.multiNames = new ConcurrentHashMap<M, List<ExtensionMeta<T, M>>>(size);
+        this.comparator = comparator;
+        this.classify = classify;
         for (ExtensionMeta<T, M> meta : extensions) {
             add(meta);
         }
@@ -96,6 +100,11 @@ public class ExtensionSpi<T, M> implements ExtensionPoint<T, M> {
     @Override
     public ExtensionMeta<T, M> meta(final M name) {
         return names.get(name);
+    }
+
+    @Override
+    public int size() {
+        return extensions.size();
     }
 
     @Override

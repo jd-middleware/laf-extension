@@ -1,13 +1,11 @@
 package com.jd.laf.extension.springboot;
 
-import com.jd.laf.extension.MyProducer;
-import com.jd.laf.extension.Producer;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import com.jd.laf.extension.service.MyProducer;
+import com.jd.laf.extension.service.Producer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConditionalOnMissingBean(Producer.class)
 public class ProducerAutoConfiguration {
 
     @Bean

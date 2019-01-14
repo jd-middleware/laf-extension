@@ -21,6 +21,8 @@ public class ExtensionMeta<T, M> {
     protected Name<? extends T, M> extension;
     //顺序
     protected int order;
+    //加载器
+    protected Object loader;
 
     public Name<? extends T, String> getName() {
         return name;
@@ -86,6 +88,14 @@ public class ExtensionMeta<T, M> {
 
     public void setOrder(int order) {
         this.order = order;
+    }
+
+    public Object getLoader() {
+        return loader;
+    }
+
+    public void setLoader(Object loader) {
+        this.loader = loader;
     }
 
     /**

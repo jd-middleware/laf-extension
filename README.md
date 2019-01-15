@@ -711,3 +711,5 @@ public interface Plugin {
 ```
 command = COMMAND.get(name);
 ```
+
+## [版本说明](RELEASE.md)

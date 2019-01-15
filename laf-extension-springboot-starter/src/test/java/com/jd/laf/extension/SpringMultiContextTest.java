@@ -26,15 +26,12 @@ public class SpringMultiContextTest {
         context.setParent(parent);
         context.start();
         ExtensionPoint<Consumer, String> consumer = new ExtensionPointLazy<Consumer, String>(Consumer.class);
-        System.out.println(consumer.size());
+        Assert.assertEquals(consumer.size(), 2);
         Consumer target = consumer.get();
         Assert.assertNotNull(target);
-        System.out.println(target.getClass().getName());
         context.close();
-        consumer = new ExtensionPointLazy<Consumer, String>(Consumer.class);
-        System.out.println(consumer.size());
+        Assert.assertEquals(consumer.size(), 1);
         target = consumer.get();
         Assert.assertNotNull(target);
-        System.out.println(target.getClass().getName());
     }
 }

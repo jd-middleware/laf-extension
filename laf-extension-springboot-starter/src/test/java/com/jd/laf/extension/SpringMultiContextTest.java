@@ -2,7 +2,7 @@ package com.jd.laf.extension;
 
 import com.jd.laf.extension.service.Consumer;
 import com.jd.laf.extension.springboot.ConsumerAutoConfiguration;
-import com.jd.laf.extension.springboot.starter.SpringLoaderAutoConfiguration;
+import com.jd.laf.extension.spring.boot.SpringLoaderAutoConfiguration;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;

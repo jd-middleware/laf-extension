@@ -607,7 +607,7 @@ public class ExtensionSelector<T, M, C, K> {
 在Spring的配置文件中配置SpringLoader
 
 ```xml
-<bean class="com.jd.laf.extension.springboot.starter.SpringLoader"/>
+<bean class="com.jd.laf.extension.spring.SpringLoader"/>
 ```
 
 #### Springboot环境

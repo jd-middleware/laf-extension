@@ -1,5 +1,6 @@
-package com.jd.laf.extension.springboot.starter;
+package com.jd.laf.extension.spring.boot;
 
+import com.jd.laf.extension.spring.SpringLoader;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;

@@ -69,7 +69,7 @@ public class ExtensionSpi<T, M> implements ExtensionPoint<T, M> {
 
     @Override
     public T get(final M name) {
-        return getObject(names.get(name));
+        return name == null ? null : getObject(names.get(name));
     }
 
     @Override
@@ -94,12 +94,12 @@ public class ExtensionSpi<T, M> implements ExtensionPoint<T, M> {
 
     @Override
     public Iterable<ExtensionMeta<T, M>> metas(M name) {
-        return multiNames.get(name);
+        return name == null ? null : multiNames.get(name);
     }
 
     @Override
     public ExtensionMeta<T, M> meta(final M name) {
-        return names.get(name);
+        return name == null ? null : names.get(name);
     }
 
     @Override

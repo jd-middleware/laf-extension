@@ -70,6 +70,8 @@ public class ExtensionManagerTest {
         Assert.assertNotNull(c1);
         Assert.assertEquals(c1, sp1.get());
         Assert.assertEquals(c1, c2);
+        //测试单例缓存是否生效
+        Assert.assertEquals(sp1.extensions(), sp2.extensions());
     }
 
     @Test

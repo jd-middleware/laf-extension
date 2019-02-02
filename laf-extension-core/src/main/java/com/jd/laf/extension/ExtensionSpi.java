@@ -1,6 +1,8 @@
 package com.jd.laf.extension;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -10,12 +12,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class ExtensionSpi<T, M> implements ExtensionPoint<T, M> {
 
-    //扩展实现
+    //按照名称分组聚合的扩展元数据
     protected ConcurrentMap<M, List<ExtensionMeta<T, M>>> multiNames;
-    //扩展实现
+    //按照名称覆盖的扩展元数据
     protected ConcurrentMap<M, ExtensionMeta<T, M>> names;
-    //扩展实现
-    protected List<ExtensionMeta<T, M>> extensions;
+    //扩展元数据列表
+    protected List<ExtensionMeta<T, M>> metas;
     //扩展点名称
     protected Name<T, String> name;
     //缓存默认插件单例实例
@@ -24,17 +26,24 @@ public class ExtensionSpi<T, M> implements ExtensionPoint<T, M> {
     protected Comparator<ExtensionMeta<T, M>> comparator;
     //分类器
     protected Classify<T, M> classify;
+    //是否都是单例
+    protected boolean singleton = true;
 
-    public ExtensionSpi(final Name<T, String> name, final List<ExtensionMeta<T, M>> extensions,
+    //缓存的插件列表
+    protected volatile List<T> extensions;
+    //缓存的插件反序遍历
+    protected volatile List<T> reverses;
+
+    public ExtensionSpi(final Name<T, String> name, final List<ExtensionMeta<T, M>> metas,
                         final Comparator<ExtensionMeta<T, M>> comparator, final Classify<T, M> classify) {
         this.name = name;
-        int size = extensions.size() + 10;
-        this.extensions = new LinkedList<ExtensionMeta<T, M>>();
+        int size = metas.size() + 10;
+        this.metas = new LinkedList<ExtensionMeta<T, M>>();
         this.names = new ConcurrentHashMap<M, ExtensionMeta<T, M>>(size);
         this.multiNames = new ConcurrentHashMap<M, List<ExtensionMeta<T, M>>>(size);
         this.comparator = comparator;
         this.classify = classify;
-        for (ExtensionMeta<T, M> meta : extensions) {
+        for (ExtensionMeta<T, M> meta : metas) {
             add(meta);
         }
     }
@@ -42,6 +51,9 @@ public class ExtensionSpi<T, M> implements ExtensionPoint<T, M> {
     protected void add(final ExtensionMeta<T, M> meta) {
         if (meta == null) {
             return;
+        }
+        if (!meta.isSingleton()) {
+            singleton = false;
         }
         List<ExtensionMeta<T, M>> metas;
         List<ExtensionMeta<T, M>> exists;
@@ -60,7 +72,7 @@ public class ExtensionSpi<T, M> implements ExtensionPoint<T, M> {
             }
             metas.add(meta);
         }
-        extensions.add(meta);
+        this.metas.add(meta);
     }
 
     protected T getObject(final ExtensionMeta<T, M> extension) {
@@ -74,8 +86,8 @@ public class ExtensionSpi<T, M> implements ExtensionPoint<T, M> {
 
     @Override
     public T get() {
-        if (target == null && !extensions.isEmpty()) {
-            ExtensionMeta<T, M> meta = extensions.get(0);
+        if (target == null && !metas.isEmpty()) {
+            ExtensionMeta<T, M> meta = metas.get(0);
             if (meta != null) {
                 if (meta.isSingleton()) {
                     target = meta.getTarget();
@@ -89,7 +101,7 @@ public class ExtensionSpi<T, M> implements ExtensionPoint<T, M> {
 
     @Override
     public Iterable<ExtensionMeta<T, M>> metas() {
-        return extensions;
+        return metas;
     }
 
     @Override
@@ -104,32 +116,72 @@ public class ExtensionSpi<T, M> implements ExtensionPoint<T, M> {
 
     @Override
     public int size() {
-        return extensions.size();
+        return metas.size();
     }
 
-    @Override
-    public Iterable<T> extensions() {
-        List<T> result = new LinkedList<T>();
-        extensions(result);
-        return result;
-    }
-
-    protected void extensions(final List<T> result) {
+    /**
+     * 构造扩展点列表
+     *
+     * @return
+     */
+    protected List<T> doExtensions() {
+        LinkedList<T> result = new LinkedList<T>();
         T object;
-        for (ExtensionMeta<T, M> extension : extensions) {
+        for (ExtensionMeta<T, M> extension : metas) {
             object = getObject(extension);
             if (object != null) {
                 result.add(object);
             }
         }
+        return result;
+    }
+
+    @Override
+    public Iterable<T> extensions() {
+        if (singleton) {
+            //单例可以缓存
+            if (extensions == null) {
+                synchronized (this) {
+                    if (extensions == null) {
+                        extensions = doExtensions();
+                    }
+                }
+            }
+            return extensions;
+        }
+        return doExtensions();
+    }
+
+    /**
+     * 反序列表
+     * @return
+     */
+    protected List<T> doReverses() {
+        LinkedList<T> result = new LinkedList<T>();
+        T object;
+        for (ExtensionMeta<T, M> extension : metas) {
+            object = getObject(extension);
+            if (object != null) {
+                result.addFirst(object);
+            }
+        }
+        return result;
     }
 
     @Override
     public Iterable<T> reverse() {
-        List<T> result = new ArrayList<T>(20);
-        extensions(result);
-        Collections.reverse(result);
-        return result;
+        if (singleton) {
+            //单例可以缓存
+            if (reverses == null) {
+                synchronized (this) {
+                    if (reverses == null) {
+                        reverses = doReverses();
+                    }
+                }
+            }
+            return reverses;
+        }
+        return doReverses();
     }
 
     @Override

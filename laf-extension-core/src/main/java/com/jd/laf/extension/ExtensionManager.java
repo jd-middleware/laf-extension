@@ -336,7 +336,7 @@ public abstract class ExtensionManager {
                 name = spi.name;
                 metas = new LinkedList<ExtensionMeta<T, M>>();
                 //原有的插件
-                metas.addAll(spi.extensions);
+                metas.addAll(spi.metas);
                 //加载新插件
                 load(name.getClazz(), name, wrapper, spi.classify, metas);
                 //排序
@@ -381,7 +381,7 @@ public abstract class ExtensionManager {
                 spi = entry.getValue();
                 name = spi.name;
                 metas = new LinkedList<ExtensionMeta<T, M>>();
-                for (ExtensionMeta<T, M> meta : spi.extensions) {
+                for (ExtensionMeta<T, M> meta : spi.metas) {
                     if (!excludes.contains(meta.loader)) {
                         metas.add(meta);
                     }

@@ -1,5 +1,7 @@
 package com.jd.laf.extension;
 
+import com.jd.laf.extension.Maps.Function;
+
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
@@ -9,11 +11,16 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * 指定接口的扩展点
+ *
+ * @param <T> 插件类型
+ * @param <M> 插件名称
  */
 public class ExtensionSpi<T, M> implements ExtensionPoint<T, M> {
 
     //按照名称分组聚合的扩展元数据
     protected ConcurrentMap<M, List<ExtensionMeta<T, M>>> multiNames;
+    //按照"名称@提供者"分组
+    protected ConcurrentMap<String, ExtensionMeta<T, M>> providers;
     //按照名称覆盖的扩展元数据
     protected ConcurrentMap<M, ExtensionMeta<T, M>> names;
     //扩展元数据列表
@@ -37,10 +44,10 @@ public class ExtensionSpi<T, M> implements ExtensionPoint<T, M> {
     public ExtensionSpi(final Name<T, String> name, final List<ExtensionMeta<T, M>> metas,
                         final Comparator<ExtensionMeta<T, M>> comparator, final Classify<T, M> classify) {
         this.name = name;
-        int size = metas.size() + 10;
         this.metas = new LinkedList<ExtensionMeta<T, M>>();
-        this.names = new ConcurrentHashMap<M, ExtensionMeta<T, M>>(size);
-        this.multiNames = new ConcurrentHashMap<M, List<ExtensionMeta<T, M>>>(size);
+        this.names = new ConcurrentHashMap<M, ExtensionMeta<T, M>>(metas.size());
+        this.multiNames = new ConcurrentHashMap<M, List<ExtensionMeta<T, M>>>(metas.size());
+        this.providers = new ConcurrentHashMap<String, ExtensionMeta<T, M>>(metas.size());
         this.comparator = comparator;
         this.classify = classify;
         for (ExtensionMeta<T, M> meta : metas) {
@@ -55,23 +62,26 @@ public class ExtensionSpi<T, M> implements ExtensionPoint<T, M> {
         if (!meta.isSingleton()) {
             singleton = false;
         }
-        List<ExtensionMeta<T, M>> metas;
-        List<ExtensionMeta<T, M>> exists;
         //扩展名称
         M name = meta.getExtension().getName();
         if (name != null) {
             //防止被覆盖
             names.putIfAbsent(name, meta);
-            metas = multiNames.get(name);
-            if (metas == null) {
-                metas = new CopyOnWriteArrayList<ExtensionMeta<T, M>>();
-                exists = multiNames.putIfAbsent(name, metas);
-                if (exists != null) {
-                    metas = exists;
-                }
-            }
+            //相同名称，不同供应商的插件集合
+            List<ExtensionMeta<T, M>> metas = Maps.computeIfAbsent(multiNames, name,
+                    new Function<M, List<ExtensionMeta<T, M>>>() {
+                        @Override
+                        public List<ExtensionMeta<T, M>> apply(M t) {
+                            return new CopyOnWriteArrayList<ExtensionMeta<T, M>>();
+                        }
+                    });
             metas.add(meta);
+
+            if (name instanceof String && meta.getProvider() != null && !meta.getProvider().isEmpty()) {
+                providers.putIfAbsent(name + "@" + meta.getProvider(), meta);
+            }
         }
+
         this.metas.add(meta);
     }
 
@@ -81,7 +91,7 @@ public class ExtensionSpi<T, M> implements ExtensionPoint<T, M> {
 
     @Override
     public T get(final M name) {
-        return name == null ? null : getObject(names.get(name));
+        return name == null ? null : getObject(meta(name));
     }
 
     @Override
@@ -105,13 +115,32 @@ public class ExtensionSpi<T, M> implements ExtensionPoint<T, M> {
     }
 
     @Override
-    public Iterable<ExtensionMeta<T, M>> metas(M name) {
+    public Iterable<ExtensionMeta<T, M>> metas(final M name) {
         return name == null ? null : multiNames.get(name);
     }
 
     @Override
     public ExtensionMeta<T, M> meta(final M name) {
-        return name == null ? null : names.get(name);
+        ExtensionMeta<T, M> result = null;
+        if (name != null) {
+            //按照插件名称获取
+            result = names.get(name);
+            if (result == null) {
+                //没有找到，猜测名称里面是有提供商
+                if (name instanceof String) {
+                    result = providers.get(name);
+                    if (result == null) {
+                        //供应商也没有找到，则尝试去掉供应商查找
+                        String v = (String) name;
+                        int pos = v.indexOf('@');
+                        if (pos > 0) {
+                            result = names.get(name);
+                        }
+                    }
+                }
+            }
+        }
+        return result;
     }
 
     @Override
@@ -154,6 +183,7 @@ public class ExtensionSpi<T, M> implements ExtensionPoint<T, M> {
 
     /**
      * 反序列表
+     *
      * @return
      */
     protected List<T> doReverses() {

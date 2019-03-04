@@ -32,9 +32,9 @@ public class ExtensionManagerTest {
     @Test
     public void testGet() {
         ExtensionManager.getOrLoadExtensionPoint(Consumer.class);
-        Consumer c1 = ExtensionManager.getExtension(Consumer.class, "myConsumer");
+        Consumer c1 = ExtensionManager.getExtension(Consumer.class, "myConsumer@test");
         Consumer c2 = ExtensionManager.getExtension(Consumer.class, "myConsumer");
-        Consumer c3 = ExtensionManager.getExtension("consumer", "myConsumer");
+        Consumer c3 = ExtensionManager.getExtension("consumer", "myConsumer@test");
         Assert.assertNotNull(c1);
         Assert.assertEquals(c1, c2);
         Assert.assertEquals(c1, c3);

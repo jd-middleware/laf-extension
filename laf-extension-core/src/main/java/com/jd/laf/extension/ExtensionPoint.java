@@ -9,9 +9,9 @@ package com.jd.laf.extension;
 public interface ExtensionPoint<T, M> {
 
     /**
-     * 获取指定扩展实现
+     * 按照名称获取指定扩展实现，字符串名称后面加上"@供应商"来优先获取指定供应商的扩展
      *
-     * @param name
+     * @param name 插件名称
      * @return
      */
     T get(final M name);
@@ -60,7 +60,7 @@ public interface ExtensionPoint<T, M> {
     Iterable<ExtensionMeta<T, M>> metas(M name);
 
     /**
-     * 获取扩展元数据
+     * 获取扩展元数据，字符串名称后面加上"@供应商"来优先获取指定供应商的扩展元数据
      *
      * @param name 名称
      * @return

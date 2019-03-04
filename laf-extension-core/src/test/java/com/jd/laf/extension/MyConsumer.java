@@ -1,6 +1,6 @@
 package com.jd.laf.extension;
 
-@Extension("myConsumer")
+@Extension(value = "myConsumer",provider = "test")
 public class MyConsumer implements Consumer {
 
     @Override

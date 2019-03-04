@@ -19,6 +19,13 @@ public @interface Extension {
     String value() default "";
 
     /**
+     * 供应商
+     *
+     * @return
+     */
+    String provider() default "";
+
+    /**
      * 排序顺序，按照优先级升序排序
      *
      * @return

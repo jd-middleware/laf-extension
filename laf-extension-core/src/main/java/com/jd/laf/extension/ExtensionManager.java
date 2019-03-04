@@ -505,6 +505,7 @@ public abstract class ExtensionManager {
                 meta.setLoader(plugin.loader);
                 meta.setExtensible(extensibleName);
                 meta.setName(plugin.name);
+                meta.setProvider(extension != null && !extension.provider().isEmpty() ? extension.provider() : pluginClass.getName());
                 meta.setInstantiation(plugin.instantiation == null ? ClazzInstance.INSTANCE : plugin.instantiation);
                 meta.setTarget(plugin.target);
                 meta.setSingleton(plugin.isSingleton() != null ? plugin.isSingleton() :

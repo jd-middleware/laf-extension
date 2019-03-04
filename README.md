@@ -219,7 +219,7 @@ public interface Instantiation {
 public interface ExtensionPoint<T, M> {
 
     /**
-     * 获取指定扩展实现
+     * 按照名称获取指定扩展实现，如果是字符串名称，可以在字符串后面加上"@供应商"来获取指定供应商提供的插件
      *
      * @param name
      * @return

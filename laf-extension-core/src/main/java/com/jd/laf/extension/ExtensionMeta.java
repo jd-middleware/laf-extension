@@ -23,6 +23,8 @@ public class ExtensionMeta<T, M> {
     protected int order;
     //加载器
     protected Object loader;
+    //供应商
+    protected String provider;
 
     public Name<? extends T, String> getName() {
         return name;
@@ -96,6 +98,14 @@ public class ExtensionMeta<T, M> {
 
     public void setLoader(Object loader) {
         this.loader = loader;
+    }
+
+    public String getProvider() {
+        return provider;
+    }
+
+    public void setProvider(String provider) {
+        this.provider = provider;
     }
 
     /**

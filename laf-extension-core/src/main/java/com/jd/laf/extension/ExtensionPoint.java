@@ -11,10 +11,27 @@ public interface ExtensionPoint<T, M> {
     /**
      * 按照名称获取指定扩展实现，字符串名称后面加上"@供应商"来优先获取指定供应商的扩展
      *
-     * @param name 插件名称
+     * @param name 扩展名称
      * @return
      */
-    T get(final M name);
+    T get(M name);
+
+    /**
+     * 按照指定名称或候选名称获取扩展
+     *
+     * @param name   扩展名称
+     * @param option 候选名称
+     * @return
+     */
+    T get(M name, M option);
+
+    /**
+     * 按照指定名称获取扩展，如果股存在则返回优先级最高的扩展
+     *
+     * @param name 扩展名称
+     * @return
+     */
+    T getOrDefault(M name);
 
     /**
      * 选择一个实现

@@ -62,8 +62,18 @@ public class ExtensionPointLazy<T, M> implements ExtensionPoint<T, M> {
     }
 
     @Override
-    public T get(M name) {
+    public T get(final M name) {
         return getDelegate().get(name);
+    }
+
+    @Override
+    public T get(final M name, final M option) {
+        return getDelegate().get(name, option);
+    }
+
+    @Override
+    public T getOrDefault(final M name) {
+        return getDelegate().getOrDefault(name);
     }
 
     @Override
@@ -77,7 +87,7 @@ public class ExtensionPointLazy<T, M> implements ExtensionPoint<T, M> {
     }
 
     @Override
-    public Iterable<ExtensionMeta<T, M>> metas(M name) {
+    public Iterable<ExtensionMeta<T, M>> metas(final M name) {
         return getDelegate().metas(name);
     }
 

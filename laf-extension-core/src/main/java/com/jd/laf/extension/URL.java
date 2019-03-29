@@ -21,19 +21,19 @@ public final class URL implements Serializable {
     public static final String UTF_8 = "UTF-8";
 
     // 协议
-    private final String protocol;
+    protected final String protocol;
     // 名称
-    private final String user;
+    protected final String user;
     // 密码
-    private final String password;
+    protected final String password;
     // 主机
-    private final String host;
+    protected final String host;
     // 端口
-    private final int port;
+    protected final int port;
     // 路径
-    private final String path;
-    // 参数
-    private final Map<String, String> parameters;
+    protected final String path;
+    // 参数，只读不能修改
+    protected final Map<String, String> parameters;
 
     protected URL() {
         this.protocol = null;
@@ -74,7 +74,7 @@ public final class URL implements Serializable {
         this.port = (port < 0 ? 0 : port);
         this.path = path;
         this.parameters = Collections.unmodifiableMap(parameters == null ?
-                new HashMap<String, String>() : new HashMap<String, String>(parameters));
+                new HashMap<String, String>(0) : new HashMap<String, String>(parameters));
     }
 
     /**
@@ -253,7 +253,7 @@ public final class URL implements Serializable {
     }
 
     public URL setProtocol(String protocol) {
-        return new URL(protocol, user, password, host, port, path, getParameters());
+        return new URL(protocol, user, password, host, port, path, parameters);
     }
 
     public String getUser() {
@@ -261,7 +261,7 @@ public final class URL implements Serializable {
     }
 
     public URL setUser(String user) {
-        return new URL(protocol, user, password, host, port, path, getParameters());
+        return new URL(protocol, user, password, host, port, path, parameters);
     }
 
     public String getPassword() {
@@ -269,7 +269,7 @@ public final class URL implements Serializable {
     }
 
     public URL setPassword(String password) {
-        return new URL(protocol, user, password, host, port, path, getParameters());
+        return new URL(protocol, user, password, host, port, path, parameters);
     }
 
     public String getHost() {
@@ -277,7 +277,7 @@ public final class URL implements Serializable {
     }
 
     public URL setHost(String host) {
-        return new URL(protocol, user, password, host, port, path, getParameters());
+        return new URL(protocol, user, password, host, port, path, parameters);
     }
 
     public int getPort() {
@@ -285,7 +285,7 @@ public final class URL implements Serializable {
     }
 
     public URL setPort(int port) {
-        return new URL(protocol, user, password, host, port, path, getParameters());
+        return new URL(protocol, user, password, host, port, path, parameters);
     }
 
     public String getAddress() {
@@ -302,7 +302,7 @@ public final class URL implements Serializable {
         } else {
             host = address;
         }
-        return new URL(protocol, user, password, host, port, path, getParameters());
+        return new URL(protocol, user, password, host, port, path, parameters);
     }
 
     public InetSocketAddress getSocketAddress() {
@@ -314,7 +314,7 @@ public final class URL implements Serializable {
     }
 
     public URL setPath(String path) {
-        return new URL(protocol, user, password, host, port, path, getParameters());
+        return new URL(protocol, user, password, host, port, path, parameters);
     }
 
     public String getAbsolutePath() {
@@ -336,6 +336,10 @@ public final class URL implements Serializable {
         return "/" + path;
     }
 
+    /**
+     * 获取一份参数拷贝。
+     * @return
+     */
     public Map<String, String> getParameters() {
         return new HashMap<String, String>(parameters);
     }
@@ -814,8 +818,23 @@ public final class URL implements Serializable {
         if (key == null || key.isEmpty()) {
             return this;
         }
-        Map<String, String> map = new HashMap<String, String>(getParameters());
+        Map<String, String> map = getParameters();
         map.put(key, value);
+        return new URL(protocol, user, password, host, port, path, map);
+    }
+
+    /**
+     * 添加参数
+     *
+     * @param url url
+     * @return 新创建的URL对象
+     */
+    public URL add(final URL url) {
+        if (url == null || url.parameters.isEmpty()) {
+            return this;
+        }
+        Map<String, String> map = getParameters();
+        map.putAll(url.parameters);
         return new URL(protocol, user, password, host, port, path, map);
     }
 
@@ -829,7 +848,7 @@ public final class URL implements Serializable {
         if (parameters == null || parameters.isEmpty()) {
             return this;
         }
-        Map<String, String> map = new HashMap<String, String>(getParameters());
+        Map<String, String> map = getParameters();
         map.putAll(parameters);
         return new URL(protocol, user, password, host, port, path, map);
     }
@@ -1002,17 +1021,28 @@ public final class URL implements Serializable {
      * @return 新创建的URL对象
      */
     public URL addIfAbsent(final String key, final String value) {
-        if (key == null || key.isEmpty() || value == null || value.isEmpty()) {
+        if (key == null || key.isEmpty() || value == null || value.isEmpty() || contains(key)) {
             return this;
         }
-        if (contains(key)) {
-            return this;
-        }
-        Map<String, String> map = new HashMap<String, String>(getParameters());
+        Map<String, String> map = getParameters();
         map.put(key, value);
         return new URL(protocol, user, password, host, port, path, map);
     }
 
+    /**
+     * 添加不存在的参数
+     *
+     * @param url url
+     * @return 新创建的URL对象
+     */
+    public URL addIfAbsent(final URL url) {
+        if (url == null || url.parameters.isEmpty()) {
+            return this;
+        }
+        Map<String, String> map = url.getParameters();
+        map.putAll(this.parameters);
+        return new URL(protocol, user, password, host, port, path, map);
+    }
 
     /**
      * 添加不存在的参数
@@ -1024,8 +1054,9 @@ public final class URL implements Serializable {
         if (parameters == null || parameters.isEmpty()) {
             return this;
         }
+        //复制一份数据
         Map<String, String> map = new HashMap<String, String>(parameters);
-        map.putAll(getParameters());
+        map.putAll(this.parameters);
         return new URL(protocol, user, password, host, port, path, map);
     }
 
@@ -1065,12 +1096,11 @@ public final class URL implements Serializable {
         if (keys == null || keys.length == 0) {
             return this;
         }
-        Map<String, String> parameters = getParameters();
-        Map<String, String> map = new HashMap<String, String>(parameters);
+        Map<String, String> map = getParameters();
         for (String key : keys) {
             map.remove(key);
         }
-        if (map.size() == parameters.size()) {
+        if (parameters.size() == map.size()) {
             return this;
         }
         return new URL(protocol, user, password, host, port, path, map);
@@ -1090,6 +1120,7 @@ public final class URL implements Serializable {
      *
      * @return 字符串表示
      */
+    @Override
     public String toString() {
         return toString(false, true); // no show user and password
     }
@@ -1142,7 +1173,7 @@ public final class URL implements Serializable {
      * @param parameters 参数名称
      */
     protected void append(final StringBuilder buf, final boolean concat, final String[] parameters) {
-        Map<String, String> map = getParameters();
+        Map<String, String> map = this.parameters;
         if (map != null && !map.isEmpty()) {
             Set<String> includes = (parameters == null || parameters.length == 0 ? null : new HashSet<String>(
                     Arrays.asList(parameters)));
@@ -1169,6 +1200,7 @@ public final class URL implements Serializable {
         }
     }
 
+    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
@@ -1179,6 +1211,7 @@ public final class URL implements Serializable {
         return result;
     }
 
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;

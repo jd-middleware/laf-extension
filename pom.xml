@@ -8,7 +8,7 @@
     <artifactId>laf-extension</artifactId>
     <packaging>pom</packaging>
     <version>1.0.16</version>
-
+    <description>A plugin loader,support SPI and Spring based plugin </description>
     <organization>
         <name>JD.com, Inc.</name>
         <url>http://www.jd.com</url>
@@ -36,10 +36,12 @@
     <distributionManagement>
         <snapshotRepository>
             <id>oss</id>
+            <name>Nexus Release Snapshot</name>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
         <repository>
             <id>oss</id>
+            <name>Nexus Release Repository</name>
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
@@ -64,7 +66,6 @@
         <maven-assembly-plugin.version>3.1.0</maven-assembly-plugin.version>
         <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version>
         <junit.version>4.12</junit.version>
-
         <spring-boot.version>2.1.1.RELEASE</spring-boot.version>
         <spring.version>5.1.2.RELEASE</spring.version>
     </properties>
@@ -201,6 +202,7 @@
                             </execution>
                         </executions>
                     </plugin>
+
                 </plugins>
             </build>
         </profile>

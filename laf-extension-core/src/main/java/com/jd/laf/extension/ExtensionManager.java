@@ -536,7 +536,7 @@ public abstract class ExtensionManager {
         /**
          * 加载扩展点集合
          *
-         * @param extensibles
+         * @param extensibles extensible class
          * @param loader
          */
         public void loadExtension(final Collection<Class<?>> extensibles, final ExtensionLoader loader) {

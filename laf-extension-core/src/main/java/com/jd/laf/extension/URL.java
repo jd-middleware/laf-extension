@@ -689,8 +689,7 @@ public final class URL implements Serializable {
      * 判断参数是否存在
      *
      * @param key 参数名称
-     * @return <li>true 存在</li>
-     * <li>false 不存在</li>
+     * @return true 存在,false 不存在
      */
     public boolean contains(final String key) {
         String value = getString(key);

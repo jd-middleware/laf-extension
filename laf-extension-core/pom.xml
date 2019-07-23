@@ -8,7 +8,7 @@
         <version>1.0.16</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
+    <name>Laf Extension Core ${project.version}</name>
     <artifactId>laf-extension-core</artifactId>
 
     <dependencies>

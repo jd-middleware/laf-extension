@@ -8,6 +8,8 @@
     <artifactId>laf-extension</artifactId>
     <packaging>pom</packaging>
     <version>1.0.16</version>
+    <name>Laf Extension ${project.version}</name>
+    <url>https://github.com/jd-middleware/laf-extension</url>
     <description>A plugin loader,support SPI and Spring based plugin </description>
     <organization>
         <name>JD.com, Inc.</name>

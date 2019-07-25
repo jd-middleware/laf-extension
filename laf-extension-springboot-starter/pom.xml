@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>laf-extension</artifactId>
-        <groupId>com.jd.laf</groupId>
+        <groupId>com.jd.joyqueue</groupId>
         <version>1.0.16</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -13,7 +13,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.jd.laf</groupId>
+            <groupId>com.jd.joyqueue</groupId>
             <artifactId>laf-extension-spring</artifactId>
             <version>${project.version}</version>
         </dependency>
